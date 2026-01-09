@@ -15,13 +15,14 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
-    BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line
+    BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, CartesianGrid
 } from 'recharts'
 import {
     Search, Bell, Plus, Copy, FileText, Send, Layout,
     Package, TrendingUp, AlertCircle, ShoppingCart, Truck,
     ChevronRight, MoreHorizontal, CalendarIcon,
-    LayoutGrid, List, LogOut, ChevronDown, Eye, Pencil, Trash2, Mail, User, MapPin, CheckCircle, Clock
+    LayoutGrid, List, LogOut, ChevronDown, Eye, Pencil, Trash2, Mail, User, MapPin, CheckCircle, Clock,
+    Home, Cuboid, BarChart3, ClipboardList
 } from "lucide-react"
 import { ModeToggle } from './components/mode-toggle'
 import {
@@ -61,9 +62,6 @@ const trackingSteps = [
 
 export default function Dashboard({ onLogout, onNavigateToDetail }: { onLogout: () => void, onNavigateToDetail: () => void }) {
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-    const [isMainOpen, setIsMainOpen] = useState(true)
-    const [isOperationsOpen, setIsOperationsOpen] = useState(true)
-
     const [searchQuery, setSearchQuery] = useState('')
     const [selectedStatuses, setSelectedStatuses] = useState<string[]>([])
     const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
@@ -89,594 +87,364 @@ export default function Dashboard({ onLogout, onNavigateToDetail }: { onLogout: 
     }, [searchQuery, selectedStatuses])
 
     return (
-        <div className="min-h-screen bg-background flex font-sans text-foreground">
-            {/* Sidebar - Using standard Tailwind for layout structure */}
-            <aside className="w-64 bg-card border-r border-border hidden md:flex flex-col">
-                <div className="h-16 flex items-center px-6 border-b border-border">
-                    <div className="h-8 flex items-center">
-                        <img src="/logo-on-light.jpg" alt="Strata" className="h-full w-auto block dark:hidden" />
-                        <img src="/logo-on-dark.jpg" alt="Strata" className="h-full w-auto hidden dark:block" />
-                    </div>
-                </div>
-                <nav className="flex-1 p-4 space-y-4 overflow-y-auto">
-                    {/* Main Category */}
-                    <div className="space-y-1">
-                        <button
-                            type="button"
-                            onClick={() => setIsMainOpen(!isMainOpen)}
-                            className="flex items-center justify-between w-full px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider hover:bg-muted/50 rounded-md transition-colors"
-                        >
-                            <span>Main</span>
-                            {isMainOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                        </button>
-                        {isMainOpen && (
-                            <div className="space-y-1 px-2">
-                                <Button variant="secondary" className="w-full justify-start gap-3">
-                                    <Layout className="h-4 w-4" />
-                                    Overview
-                                </Button>
-                            </div>
-                        )}
+        <div className="min-h-screen bg-background font-sans text-foreground pb-12">
+
+            {/* Floating Capsule Navbar */}
+            <div className="fixed top-6 left-1/2 transform -translate-x-1/2 z-50">
+                <div className="flex items-center p-2 rounded-full gap-2 bg-background/70 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-lg">
+                    {/* Logo */}
+                    <div className="px-4">
+                        <img src="/logo-on-light.jpg" alt="Strata" className="h-5 w-auto block dark:hidden" />
+                        <img src="/logo-on-dark.jpg" alt="Strata" className="h-5 w-auto hidden dark:block" />
                     </div>
 
-                    {/* Operations Category */}
-                    <div className="space-y-1">
-                        <button
-                            type="button"
-                            onClick={() => setIsOperationsOpen(!isOperationsOpen)}
-                            className="flex items-center justify-between w-full px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider hover:bg-muted/50 rounded-md transition-colors"
-                        >
-                            <span>Operations</span>
-                            {isOperationsOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                        </button>
-                        {isOperationsOpen && (
-                            <div className="space-y-1 px-2">
-                                <Button variant="ghost" className="w-full justify-start gap-3">
-                                    <Package className="h-4 w-4" />
-                                    Inventory
+                    <div className="h-6 w-px bg-border mx-1" />
+
+                    {/* Nav Items */}
+                    <nav className="flex items-center gap-1">
+                        <NavItem icon={<Home className="h-4 w-4" />} label="Overview" isActive />
+                        <NavItem icon={<Cuboid className="h-4 w-4" />} label="Inventory" />
+                        <NavItem icon={<BarChart3 className="h-4 w-4" />} label="Production" />
+                        <NavItem icon={<ClipboardList className="h-4 w-4" />} label="Orders" />
+                    </nav>
+
+                    <div className="h-6 w-px bg-border mx-1" />
+
+                    {/* Actions */}
+                    <div className="flex items-center pr-2 gap-2">
+                        <ModeToggle />
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" className="rounded-full h-8 w-8 p-0">
+                                    <Avatar className="h-7 w-7">
+                                        <AvatarImage src="https://github.com/shadcn.png" />
+                                        <AvatarFallback>JD</AvatarFallback>
+                                    </Avatar>
                                 </Button>
-                                <Button variant="ghost" className="w-full justify-start gap-3">
-                                    <TrendingUp className="h-4 w-4" />
-                                    Production
-                                </Button>
-                                <Button variant="ghost" className="w-full justify-start gap-3">
-                                    <ShoppingCart className="h-4 w-4" />
-                                    Orders
-                                </Button>
-                                <Button variant="ghost" className="w-full justify-start gap-3">
-                                    <Truck className="h-4 w-4" />
-                                    Logistics
-                                </Button>
-                            </div>
-                        )}
-                    </div>
-                </nav>
-                <div className="p-4 border-t border-border">
-                    <div className="flex items-center gap-3 px-2 py-2">
-                        <Avatar className="h-8 w-8">
-                            <AvatarImage src="https://github.com/shadcn.png" />
-                            <AvatarFallback>JD</AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1 overflow-hidden">
-                            <p className="text-sm font-medium leading-none truncate">Jhon Doe</p>
-                            <p className="text-xs text-muted-foreground truncate">Admin</p>
-                        </div>
-                        <Button variant="ghost" size="icon" onClick={onLogout} title="Logout">
-                            <LogOut className="h-4 w-4 text-muted-foreground" />
-                        </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-56">
+                                <div className="px-2 py-1.5">
+                                    <p className="text-sm font-medium">Jhon Doe</p>
+                                    <p className="text-xs text-muted-foreground">admin@strata.com</p>
+                                </div>
+                                <Separator className="my-1" />
+                                <DropdownMenuItem onClick={onLogout} className="text-red-500 focus:text-red-500">
+                                    <LogOut className="mr-2 h-4 w-4" />
+                                    <span>Sign Out</span>
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </div>
                 </div>
-            </aside>
+            </div>
 
             {/* Main Content */}
-            <main className="flex-1 overflow-hidden flex flex-col">
+            <main className="pt-28 px-6 max-w-[1400px] mx-auto space-y-8">
                 {/* Header */}
-                <header className="h-16 bg-background border-b border-border flex items-center justify-between px-8">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <span>Dashboard</span>
-                        <ChevronRight className="h-4 w-4" />
-                        <span className="text-foreground font-medium">Operational Overview</span>
-                    </div>
-                    <div className="flex items-center gap-4">
-                        <div className="relative w-64">
-                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                            <Input placeholder="Search..." className="pl-9 h-9 bg-background border-input" />
-                        </div>
-                        <Button variant="outline" size="sm" className="h-9 gap-2 text-muted-foreground">
-                            <CalendarIcon className="h-4 w-4" />
-                            Jan 1 - Jan 31, 2025
-                        </Button>
-                        <Button variant="ghost" size="icon" className="relative">
-                            <Bell className="h-4 w-4 text-muted-foreground" />
-                            <span className="absolute top-2 right-2 h-2 w-2 bg-destructive rounded-full border border-background"></span>
-                        </Button>
-                        <ModeToggle />
-                    </div>
-                </header>
-
-                {/* Scrollable Area */}
-                <div className="flex-1 overflow-auto p-8 space-y-8">
-
-                    {/* KPI Cards */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <Card>
-                            <CardHeader className="pb-2">
-                                <CardDescription className="text-xs font-medium uppercase tracking-wider text-gray-500">Total Inventory Value</CardDescription>
-                                <CardTitle className="text-2xl font-normal">$1.2M</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-xs text-green-600 flex items-center gap-1 font-medium">
-                                    <TrendingUp className="h-3 w-3" /> +0.2% vs last month
-                                </div>
-                            </CardContent>
-                        </Card>
-                        <Card>
-                            <CardHeader className="pb-2">
-                                <CardDescription className="text-xs font-medium uppercase tracking-wider text-gray-500">Production Efficiency</CardDescription>
-                                <CardTitle className="text-2xl font-normal">88%</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-xs text-green-600 flex items-center gap-1 font-medium">
-                                    <TrendingUp className="h-3 w-3" /> +3.5% vs last month
-                                </div>
-                            </CardContent>
-                        </Card>
-                        <Card>
-                            <CardHeader className="pb-2">
-                                <CardDescription className="text-xs font-medium uppercase tracking-wider text-gray-500">Pending Orders</CardDescription>
-                                <CardTitle className="text-2xl font-normal">142</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-xs text-muted-foreground flex items-center gap-1">
-                                    -12 vs yesterday
-                                </div>
-                            </CardContent>
-                        </Card>
-                        <Card>
-                            <CardHeader className="pb-2">
-                                <CardDescription className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Low Stock Alerts</CardDescription>
-                                <CardTitle className="text-2xl font-normal">15</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-xs text-destructive flex items-center gap-1 font-medium">
-                                    <AlertCircle className="h-3 w-3" /> Requires attention
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </div>
-
-                    {/* Quick Actions */}
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                     <div>
-                        <h2 className="text-sm font-medium text-muted-foreground mb-4">Quick Actions</h2>
-                        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                            <Button variant="outline" className="h-24 flex flex-col gap-2 bg-card hover:bg-accent border-border text-foreground hover:text-accent-foreground">
-                                <Plus className="h-6 w-6 bg-primary text-primary-foreground p-1 rounded" />
-                                New Order
-                            </Button>
-                            <Button variant="outline" className="h-24 flex flex-col gap-2 bg-card hover:bg-accent border-border text-foreground hover:text-accent-foreground">
-                                <Copy className="h-5 w-5 text-muted-foreground" />
-                                Duplicate
-                            </Button>
-                            <Button variant="outline" className="h-24 flex flex-col gap-2 bg-card hover:bg-accent border-border text-foreground hover:text-accent-foreground">
-                                <FileText className="h-5 w-5 text-muted-foreground" />
-                                Export PDF
-                            </Button>
-                            <Button variant="outline" className="h-24 flex flex-col gap-2 bg-card hover:bg-accent border-border text-foreground hover:text-accent-foreground">
-                                <Send className="h-5 w-5 text-muted-foreground" />
-                                Send Email
-                            </Button>
-                            <Button variant="outline" className="h-24 flex flex-col gap-2 bg-card hover:bg-accent border-border text-foreground hover:text-accent-foreground">
-                                <Layout className="h-5 w-5 text-muted-foreground" />
-                                Templates
-                            </Button>
+                        <h1 className="text-3xl font-semibold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-foreground to-muted-foreground">
+                            Operational Overview
+                        </h1>
+                        <p className="text-muted-foreground mt-1">Jan 1 - Jan 31, 2025</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <div className="relative w-full md:w-64">
+                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                            <Input placeholder="Search everything..." className="pl-9 bg-background/50 backdrop-blur-sm border-input rounded-full" />
+                        </div>
+                        <Button variant="outline" size="icon" className="rounded-full">
+                            <Bell className="h-4 w-4" />
+                        </Button>
+                    </div>
+                </div>
+
+                {/* KPI Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <KPICard title="Total Inventory" value="$1.2M" trend="+0.2% vs last month" trendUp icon={<Cuboid className="h-4 w-4" />} />
+                    <KPICard title="Efficiency" value="88%" trend="+3.5% vs last month" trendUp icon={<BarChart3 className="h-4 w-4" />} />
+                    <KPICard title="Pending Orders" value="142" trend="-12 vs yesterday" icon={<ClipboardList className="h-4 w-4" />} />
+                    <KPICard title="Low Stock" value="15" trend="Requires attention" trendAlert icon={<AlertCircle className="h-4 w-4" />} />
+                </div>
+
+                {/* Quick Actions */}
+                <div className="mb-8 overflow-x-auto">
+                    <div className="flex items-center gap-6 min-w-max">
+                        <h2 className="text-lg font-medium text-muted-foreground">Quick Actions</h2>
+                        <div className="flex items-center gap-4">
+                            {[
+                                { icon: <Plus className="w-5 h-5" />, label: "New Order" },
+                                { icon: <Copy className="w-5 h-5" />, label: "Duplicate" },
+                                { icon: <FileText className="w-5 h-5" />, label: "Export PDF" },
+                                { icon: <Send className="w-5 h-5" />, label: "Send Email" },
+                                { icon: <Copy className="w-5 h-5" />, label: "Templates" },
+                            ].map((action, i) => (
+                                <button key={i} className="flex flex-col items-center gap-2 group">
+                                    <div className="w-12 h-12 rounded-full bg-card border border-dashed border-border flex items-center justify-center text-muted-foreground group-hover:border-primary group-hover:bg-primary/10 group-hover:text-primary transition-all shadow-sm">
+                                        {action.icon}
+                                    </div>
+                                    <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors">{action.label}</span>
+                                </button>
+                            ))}
                         </div>
                     </div>
+                </div>
 
-                    {/* Main Charts & Content */}
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-                        {/* Orders Table */}
-                        <Card className="lg:col-span-3">
-                            <CardHeader className="flex flex-row items-center justify-between pb-2">
-                                <CardTitle className="text-base font-medium">Recent Orders</CardTitle>
-                                <div className="flex gap-2 items-center">
-                                    <div className="relative w-48">
-                                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                                        <Input
-                                            placeholder="Search orders..."
-                                            className="pl-9 h-8 bg-background border-input"
-                                            value={searchQuery}
-                                            onChange={(e) => setSearchQuery(e.target.value)}
-                                        />
-                                    </div>
-                                    <div className="flex items-center gap-1 border border-border rounded-md p-1">
-                                        <Button
-                                            variant={viewMode === 'list' ? 'secondary' : 'ghost'}
-                                            size="sm"
-                                            className="h-6 w-6 p-0"
-                                            onClick={() => setViewMode('list')}
-                                        >
-                                            <List className="h-3 w-3" />
-                                        </Button>
-                                        <Button
-                                            variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
-                                            size="sm"
-                                            className="h-6 w-6 p-0"
-                                            onClick={() => setViewMode('grid')}
-                                        >
-                                            <LayoutGrid className="h-3 w-3" />
-                                        </Button>
-                                    </div>
-                                    <Popover>
-                                        <PopoverTrigger asChild>
-                                            <Button variant="outline" size="sm" className="h-8 gap-1">Status <ChevronDown className="h-3 w-3" /></Button>
-                                        </PopoverTrigger>
-                                        <PopoverContent className="w-56 p-2" align="end">
-                                            <div className="space-y-2">
-                                                {['Pending Review', 'In Production', 'Shipped'].map((status) => (
-                                                    <div key={status} className="flex items-center space-x-2">
-                                                        <Checkbox
-                                                            id={status}
-                                                            checked={selectedStatuses.includes(status)}
-                                                            onCheckedChange={(checked) => {
-                                                                if (checked) {
-                                                                    setSelectedStatuses([...selectedStatuses, status])
-                                                                } else {
-                                                                    setSelectedStatuses(selectedStatuses.filter(s => s !== status))
-                                                                }
-                                                            }}
-                                                        />
-                                                        <label
-                                                            htmlFor={status}
-                                                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                                                        >
-                                                            {status}
-                                                        </label>
-                                                    </div>
-                                                ))}
-                                                <Separator className="my-2" />
-                                                <Button variant="ghost" size="sm" className="w-full h-8 px-2 text-xs" onClick={() => setSelectedStatuses([])}>
-                                                    Clear Filter
-                                                </Button>
-                                            </div>
-                                        </PopoverContent>
-                                    </Popover>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    {/* Orders Table */}
+                    <Card className="lg:col-span-3 border-none shadow-md bg-card/50 backdrop-blur-sm rounded-3xl overflow-hidden ring-1 ring-border">
+                        <CardHeader className="flex flex-row items-center justify-between border-b bg-muted/20 px-6 py-4">
+                            <div className="flex items-center gap-3">
+                                <CardTitle className="text-lg">Recent Orders</CardTitle>
+                                <Badge variant="secondary" className="rounded-full">Active</Badge>
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <div className="flex items-center gap-1 bg-muted/50 rounded-lg p-1">
+                                    <Button
+                                        variant={viewMode === 'list' ? 'secondary' : 'ghost'}
+                                        size="sm"
+                                        className="h-7 w-7 p-0 rounded-md"
+                                        onClick={() => setViewMode('list')}
+                                    >
+                                        <List className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                        variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
+                                        size="sm"
+                                        className="h-7 w-7 p-0 rounded-md"
+                                        onClick={() => setViewMode('grid')}
+                                    >
+                                        <LayoutGrid className="h-4 w-4" />
+                                    </Button>
                                 </div>
-                            </CardHeader>
-                            <CardContent>
-                                {viewMode === 'list' ? (
-                                    <Table>
-                                        <TableHeader>
-                                            <TableRow>
-                                                <TableHead className="w-[100px]">Order ID</TableHead>
-                                                <TableHead>Customer</TableHead>
-                                                <TableHead>Amount</TableHead>
-                                                <TableHead>Status</TableHead>
-                                                <TableHead>Due Date</TableHead>
-                                                <TableHead className="text-right">Actions</TableHead>
-                                            </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            {filteredOrders.map((order) => (
-                                                <>
-                                                    <TableRow
-                                                        key={order.id}
-                                                        className={`cursor-pointer hover:bg-muted/50 transition-colors ${expandedIds.has(order.id) ? "bg-muted/50" : ""}`}
-                                                        onClick={() => toggleExpand(order.id)}
-                                                    >
-                                                        <TableCell className="font-medium flex items-center gap-2">
-                                                            {expandedIds.has(order.id) ? <ChevronDown className="h-4 w-4 text-muted-foreground" /> : <ChevronRight className="h-4 w-4 text-muted-foreground" />}
-                                                            {order.id}
-                                                        </TableCell>
-                                                        <TableCell>
-                                                            <div className="flex items-center gap-2">
-                                                                <Avatar className="h-6 w-6 text-[10px]">
-                                                                    <AvatarFallback>{order.avatar}</AvatarFallback>
-                                                                </Avatar>
-                                                                <span className="text-sm">{order.customer}</span>
-                                                            </div>
-                                                        </TableCell>
-                                                        <TableCell>{order.amount}</TableCell>
-                                                        <TableCell>
-                                                            <Badge variant={order.status === 'Shipped' ? 'default' : 'secondary'} className="font-normal">
-                                                                {order.status}
-                                                            </Badge>
-                                                        </TableCell>
-                                                        <TableCell className="text-gray-500">{order.date}</TableCell>
-                                                        <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
-                                                            <DropdownMenu>
-                                                                <DropdownMenuTrigger asChild>
-                                                                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                                                                        <MoreHorizontal className="h-4 w-4" />
-                                                                    </Button>
-                                                                </DropdownMenuTrigger>
-                                                                <DropdownMenuContent align="end">
-                                                                    <DropdownMenuItem onClick={onNavigateToDetail}>
-                                                                        <Eye className="mr-2 h-4 w-4" />
-                                                                        View Details
-                                                                    </DropdownMenuItem>
-                                                                    <DropdownMenuItem>
-                                                                        <Pencil className="mr-2 h-4 w-4" />
-                                                                        Edit
-                                                                    </DropdownMenuItem>
-                                                                    <DropdownMenuItem>
-                                                                        <Trash2 className="mr-2 h-4 w-4" />
-                                                                        Delete
-                                                                    </DropdownMenuItem>
-                                                                    <DropdownMenuItem>
-                                                                        <Mail className="mr-2 h-4 w-4" />
-                                                                        Contact
-                                                                    </DropdownMenuItem>
-                                                                </DropdownMenuContent>
-                                                            </DropdownMenu>
-                                                        </TableCell>
-                                                    </TableRow>
-                                                    {expandedIds.has(order.id) && (
-                                                        <TableRow className="bg-muted/30 hover:bg-muted/30">
-                                                            <TableCell colSpan={6} className="p-0">
-                                                                <div className="p-6">
-                                                                    <div className="flex flex-col gap-6">
-                                                                        <div className="flex flex-col md:flex-row justify-between gap-4">
-                                                                            <div className="flex items-start gap-3">
-                                                                                <Avatar className="h-10 w-10">
-                                                                                    <AvatarImage src="" />
-                                                                                    <AvatarFallback><User className="h-5 w-5 text-muted-foreground" /></AvatarFallback>
-                                                                                </Avatar>
-                                                                                <div>
-                                                                                    <p className="text-sm font-medium">Sarah Johnson</p>
-                                                                                    <p className="text-xs text-muted-foreground">Project Manager</p>
-                                                                                </div>
-                                                                            </div>
-                                                                            <div className="grid grid-cols-2 gap-8">
-                                                                                <div>
-                                                                                    <p className="text-xs text-muted-foreground font-medium uppercase mb-1">Location</p>
-                                                                                    <div className="flex items-center gap-1.5 text-sm">
-                                                                                        <MapPin className="h-4 w-4 text-muted-foreground" />
-                                                                                        NY, USA
-                                                                                    </div>
-                                                                                </div>
-                                                                                <div>
-                                                                                    <p className="text-xs text-muted-foreground font-medium uppercase mb-1">Project ID</p>
-                                                                                    <p className="text-sm">PRJ-24-87</p>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-
-                                                                        <div className="relative py-2">
-                                                                            <div className="absolute top-[23px] left-0 right-0 h-0.5 bg-border" />
-                                                                            <div className="flex justify-between">
-                                                                                {['Order Placed', 'Manufacturing', 'Quality', 'Shipping'].map((step, i) => (
-                                                                                    <div key={i} className="relative z-10 flex flex-col items-center gap-2 bg-muted/30 px-2">
-                                                                                        <div
-                                                                                            className={`flex items-center justify-center w-8 h-8 rounded-full border ${i <= 1 ? "bg-primary text-primary-foreground border-primary" : "bg-background border-muted-foreground text-muted-foreground"}`}
-                                                                                        >
-                                                                                            {i < 1 ? <CheckCircle className="h-4 w-4" /> : i === 1 ? <Clock className="h-4 w-4" /> : <div className="w-2 h-2 rounded-full bg-muted-foreground" />}
-                                                                                        </div>
-                                                                                        <span className={`text-xs ${i <= 1 ? "font-medium text-foreground" : "text-muted-foreground"}`}>{step}</span>
-                                                                                    </div>
-                                                                                ))}
-                                                                            </div>
-                                                                        </div>
-
-                                                                        <div className="flex items-center gap-3 p-3 bg-background border rounded-lg">
-                                                                            <Truck className="h-5 w-5 text-muted-foreground" />
-                                                                            <div className="flex-1">
-                                                                                <p className="text-sm font-medium">Truck delayed at Customs - New ETA +24h</p>
-                                                                                <p className="text-xs text-muted-foreground">The delivery truck has been delayed at the export checkpoint. Estimated arrival updated.</p>
-                                                                            </div>
-                                                                            <Button size="sm" variant="secondary" className="h-7 text-xs" onClick={() => setTrackingOrder(order)}>Track</Button>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </TableCell>
-                                                        </TableRow>
-                                                    )}
-                                                </>
+                                <Popover>
+                                    <PopoverTrigger asChild>
+                                        <Button variant="outline" size="sm" className="h-8 gap-2 rounded-lg text-xs font-medium uppercase tracking-wide">Status <ChevronDown className="h-3 w-3" /></Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-56 p-2" align="end">
+                                        <div className="space-y-2">
+                                            {['Pending Review', 'In Production', 'Shipped'].map((status) => (
+                                                <div key={status} className="flex items-center space-x-2">
+                                                    <Checkbox
+                                                        id={status}
+                                                        checked={selectedStatuses.includes(status)}
+                                                        onCheckedChange={(checked) => {
+                                                            if (checked) {
+                                                                setSelectedStatuses([...selectedStatuses, status])
+                                                            } else {
+                                                                setSelectedStatuses(selectedStatuses.filter(s => s !== status))
+                                                            }
+                                                        }}
+                                                    />
+                                                    <label htmlFor={status} className="text-sm font-medium leading-none cursor-pointer">{status}</label>
+                                                </div>
                                             ))}
-                                            {filteredOrders.length === 0 && (
-                                                <TableRow>
-                                                    <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
-                                                        No orders found matching your criteria.
-                                                    </TableCell>
-                                                </TableRow>
-                                            )}
-                                        </TableBody>
-                                    </Table>
-                                ) : (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                            <Separator className="my-2" />
+                                            <Button variant="ghost" size="sm" className="w-full h-8 px-2 text-xs" onClick={() => setSelectedStatuses([])}>Clear Filter</Button>
+                                        </div>
+                                    </PopoverContent>
+                                </Popover>
+                            </div>
+                        </CardHeader>
+                        <CardContent className="p-0">
+                            {viewMode === 'list' ? (
+                                <Table>
+                                    <TableHeader className="bg-muted/30">
+                                        <TableRow className="hover:bg-transparent">
+                                            <TableHead className="w-[120px] pl-6">Order ID</TableHead>
+                                            <TableHead>Customer</TableHead>
+                                            <TableHead>Amount</TableHead>
+                                            <TableHead>Status</TableHead>
+                                            <TableHead>Date</TableHead>
+                                            <TableHead className="text-right pr-6">Actions</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
                                         {filteredOrders.map((order) => (
-                                            <div
-                                                key={order.id}
-                                                className={`border rounded-lg p-4 space-y-3 transition-colors cursor-pointer ${expandedIds.has(order.id) ? "bg-muted/30 border-muted-foreground/50" : "hover:border-gray-400"}`}
-                                                onClick={() => toggleExpand(order.id)}
-                                            >
-                                                <div className="flex justify-between items-start">
-                                                    <div>
+                                            <>
+                                                <TableRow
+                                                    key={order.id}
+                                                    className={`cursor-pointer hover:bg-muted/40 transition-colors ${expandedIds.has(order.id) ? "bg-muted/40" : ""}`}
+                                                    onClick={() => toggleExpand(order.id)}
+                                                >
+                                                    <TableCell className="font-semibold pl-6 flex items-center gap-2">
+                                                        {expandedIds.has(order.id) ? <ChevronDown className="h-4 w-4 text-primary" /> : <ChevronRight className="h-4 w-4 text-muted-foreground" />}
+                                                        {order.id}
+                                                    </TableCell>
+                                                    <TableCell>
                                                         <div className="flex items-center gap-2">
-                                                            <div className="font-medium text-sm text-gray-900">{order.id}</div>
-                                                            {expandedIds.has(order.id) ? <ChevronDown className="h-4 w-4 text-muted-foreground" /> : <ChevronRight className="h-4 w-4 text-muted-foreground" />}
+                                                            <Avatar className="h-6 w-6 text-[10px]">
+                                                                <AvatarFallback className="bg-primary/10 text-primary">{order.avatar}</AvatarFallback>
+                                                            </Avatar>
+                                                            <span className="text-sm font-medium">{order.customer}</span>
                                                         </div>
-                                                        <div className="text-xs text-gray-500 mt-1">{order.customer}</div>
-                                                    </div>
-                                                    <div onClick={(e) => e.stopPropagation()}>
+                                                    </TableCell>
+                                                    <TableCell className="text-muted-foreground">{order.amount}</TableCell>
+                                                    <TableCell>
+                                                        <Badge variant={order.status === 'Shipped' ? 'default' : 'secondary'} className="rounded-full font-normal">
+                                                            {order.status}
+                                                        </Badge>
+                                                    </TableCell>
+                                                    <TableCell className="text-muted-foreground text-sm">{order.date}</TableCell>
+                                                    <TableCell className="text-right pr-6" onClick={(e) => e.stopPropagation()}>
                                                         <DropdownMenu>
                                                             <DropdownMenuTrigger asChild>
-                                                                <Button variant="ghost" size="icon" className="h-6 w-6">
-                                                                    <MoreHorizontal className="h-3 w-3" />
+                                                                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-background shadow-none">
+                                                                    <MoreHorizontal className="h-4 w-4" />
                                                                 </Button>
                                                             </DropdownMenuTrigger>
                                                             <DropdownMenuContent align="end">
-                                                                <DropdownMenuItem onClick={onNavigateToDetail}>
-                                                                    <Eye className="mr-2 h-4 w-4" />
-                                                                    View Details
-                                                                </DropdownMenuItem>
-                                                                <DropdownMenuItem>
-                                                                    <Pencil className="mr-2 h-4 w-4" />
-                                                                    Edit
-                                                                </DropdownMenuItem>
-                                                                <DropdownMenuItem>
-                                                                    <Trash2 className="mr-2 h-4 w-4" />
-                                                                    Delete
-                                                                </DropdownMenuItem>
-                                                                <DropdownMenuItem>
-                                                                    <Mail className="mr-2 h-4 w-4" />
-                                                                    Contact
-                                                                </DropdownMenuItem>
+                                                                <DropdownMenuItem onClick={onNavigateToDetail}><Eye className="mr-2 h-4 w-4" /> View Details</DropdownMenuItem>
+                                                                <DropdownMenuItem><Pencil className="mr-2 h-4 w-4" /> Edit</DropdownMenuItem>
+                                                                <DropdownMenuItem><Trash2 className="mr-2 h-4 w-4" /> Delete</DropdownMenuItem>
+                                                                <DropdownMenuItem><Mail className="mr-2 h-4 w-4" /> Contact</DropdownMenuItem>
                                                             </DropdownMenuContent>
                                                         </DropdownMenu>
+                                                    </TableCell>
+                                                </TableRow>
+                                                {expandedIds.has(order.id) && (
+                                                    <TableRow className="bg-muted/20 hover:bg-muted/20">
+                                                        <TableCell colSpan={6} className="p-0">
+                                                            <div className="p-8 grid md:grid-cols-[1fr_300px] gap-8">
+                                                                <div className="space-y-6">
+                                                                    <div className="flex items-center gap-4">
+                                                                        <Avatar className="h-12 w-12 border-2 border-background shadow-sm">
+                                                                            <AvatarFallback className="bg-muted text-muted-foreground"><User className="h-6 w-6" /></AvatarFallback>
+                                                                        </Avatar>
+                                                                        <div>
+                                                                            <p className="text-base font-semibold text-foreground">Sarah Johnson</p>
+                                                                            <p className="text-sm text-muted-foreground">Project Manager</p>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div className="relative py-4">
+                                                                        <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-border -translate-y-1/2" />
+                                                                        <div className="flex justify-between relative z-10">
+                                                                            {['Placed', 'Mfg', 'Qual', 'Ship'].map((step, i) => (
+                                                                                <div key={i} className="flex flex-col items-center gap-2 bg-background/0 px-2">
+                                                                                    <div className={`flex items-center justify-center w-8 h-8 rounded-full border shadow-sm ${i <= 1 ? "bg-primary text-primary-foreground border-primary" : "bg-background border-border text-muted-foreground"}`}>
+                                                                                        {i < 1 ? <CheckCircle className="h-4 w-4" /> : i === 1 ? <Clock className="h-4 w-4" /> : <div className="w-2 h-2 rounded-full bg-muted-foreground" />}
+                                                                                    </div>
+                                                                                    <span className={`text-xs font-medium ${i <= 1 ? "text-primary" : "text-muted-foreground"}`}>{step}</span>
+                                                                                </div>
+                                                                            ))}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                                <Card className="bg-background/80 shadow-sm border-2 border-muted">
+                                                                    <CardContent className="p-4 space-y-3">
+                                                                        <div className="flex items-center gap-2 text-orange-500 font-semibold text-xs uppercase tracking-wide">
+                                                                            <AlertCircle className="h-4 w-4" /> Attention Needed
+                                                                        </div>
+                                                                        <div>
+                                                                            <p className="font-medium">Customs Delay</p>
+                                                                            <p className="text-xs text-muted-foreground mt-1">Held at port. ETA +24h.</p>
+                                                                        </div>
+                                                                        <Button size="sm" variant="outline" className="w-full text-xs h-8" onClick={() => setTrackingOrder(order)}>Track Shipment</Button>
+                                                                    </CardContent>
+                                                                </Card>
+                                                            </div>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                )}
+                                            </>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            ) : (
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-6">
+                                    {filteredOrders.map((order) => (
+                                        <Card
+                                            key={order.id}
+                                            className={`cursor-pointer transition-all hover:border-primary/50 hover:shadow-md ${expandedIds.has(order.id) ? "ring-2 ring-primary border-primary bg-primary/5" : ""}`}
+                                            onClick={() => toggleExpand(order.id)}
+                                        >
+                                            <CardContent className="p-5 space-y-4">
+                                                <div className="flex justify-between items-start">
+                                                    <div className="flex items-center gap-3">
+                                                        <Avatar className="h-10 w-10 border border-border">
+                                                            <AvatarFallback className="bg-background text-foreground text-xs font-semibold">{order.avatar}</AvatarFallback>
+                                                        </Avatar>
+                                                        <div>
+                                                            <p className="font-semibold text-sm">{order.customer}</p>
+                                                            <p className="text-xs text-muted-foreground">{order.id}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div onClick={(e) => e.stopPropagation()}>
+                                                        <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground">
+                                                            <MoreHorizontal className="h-4 w-4" />
+                                                        </Button>
                                                     </div>
                                                 </div>
                                                 <Separator />
-                                                <div className="space-y-2">
-                                                    <div className="flex justify-between text-sm">
-                                                        <span className="text-gray-500">Amount</span>
-                                                        <span className="font-medium">{order.amount}</span>
-                                                    </div>
-                                                    <div className="flex justify-between text-sm">
-                                                        <span className="text-gray-500">Due Date</span>
-                                                        <span>{order.date}</span>
-                                                    </div>
-                                                    <div className="flex justify-between items-center pt-1">
-                                                        <Badge variant={order.status === 'Shipped' ? 'default' : 'secondary'} className="font-normal text-xs">
-                                                            {order.status}
-                                                        </Badge>
-                                                        <Avatar className="h-5 w-5 text-[9px]">
-                                                            <AvatarFallback>{order.avatar}</AvatarFallback>
-                                                        </Avatar>
-                                                    </div>
+                                                <div className="grid grid-cols-2 gap-y-2 text-sm">
+                                                    <span className="text-muted-foreground">Amount</span>
+                                                    <span className="font-medium text-right">{order.amount}</span>
+                                                    <span className="text-muted-foreground">Date</span>
+                                                    <span className="text-right">{order.date}</span>
                                                 </div>
-
+                                                <div className="pt-2">
+                                                    <Badge variant="outline" className="w-full justify-center py-1 font-normal bg-background/50">{order.status}</Badge>
+                                                </div>
                                                 {expandedIds.has(order.id) && (
-                                                    <div className="pt-4 mt-4 border-t border-border cursor-default" onClick={(e) => e.stopPropagation()}>
-                                                        <div className="flex flex-col gap-4">
-                                                            <div className="flex items-center gap-3">
-                                                                <Avatar className="h-8 w-8">
-                                                                    <AvatarImage src="" />
-                                                                    <AvatarFallback><User className="h-4 w-4 text-muted-foreground" /></AvatarFallback>
-                                                                </Avatar>
-                                                                <div>
-                                                                    <p className="text-sm font-medium">Sarah Johnson</p>
-                                                                    <p className="text-xs text-muted-foreground">Project Manager</p>
-                                                                </div>
-                                                            </div>
-
-                                                            <div className="grid grid-cols-2 gap-4">
-                                                                <div>
-                                                                    <p className="text-[10px] text-muted-foreground font-medium uppercase mb-1">Location</p>
-                                                                    <div className="flex items-center gap-1 text-sm">
-                                                                        <MapPin className="h-3 w-3 text-muted-foreground" />
-                                                                        NY, USA
-                                                                    </div>
-                                                                </div>
-                                                                <div>
-                                                                    <p className="text-[10px] text-muted-foreground font-medium uppercase mb-1">Project ID</p>
-                                                                    <p className="text-sm">PRJ-24-87</p>
-                                                                </div>
-                                                            </div>
-
-                                                            <div className="bg-muted/30 p-3 rounded-md">
-                                                                {['Placed', 'Mfg', 'Qual', 'Ship'].map((step, i) => (
-                                                                    <div key={i} className="flex items-center gap-2 mb-1 last:mb-0">
-                                                                        <div className={`w-1.5 h-1.5 rounded-full ${i <= 1 ? "bg-primary" : "bg-muted-foreground"}`} />
-                                                                        <span className={`text-xs ${i <= 1 ? "text-foreground" : "text-muted-foreground"}`}>{step}</span>
-                                                                    </div>
-                                                                ))}
-                                                            </div>
-
-                                                            <div className="flex items-start gap-2 p-2 bg-background border rounded-md">
-                                                                <Truck className="h-3 w-3 text-muted-foreground mt-0.5" />
-                                                                <div className="flex-1">
-                                                                    <p className="text-xs font-medium">Delay: Customs</p>
-                                                                    <p className="text-[10px] text-muted-foreground">+24h ETA</p>
-                                                                </div>
-                                                                <Button size="sm" variant="secondary" className="h-6 text-[10px] px-2 h-auto py-1" onClick={() => setTrackingOrder(order)}>Track</Button>
-                                                            </div>
-                                                        </div>
+                                                    <div className="pt-2">
+                                                        <Button className="w-full h-8 text-xs" onClick={(e) => { e.stopPropagation(); setTrackingOrder(order); }}>Track Order</Button>
                                                     </div>
                                                 )}
-                                            </div>
-                                        ))}
-                                        {filteredOrders.length === 0 && (
-                                            <div className="col-span-full h-24 flex items-center justify-center text-muted-foreground">
-                                                No orders found matching your criteria.
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-                            </CardContent>
-                        </Card>
+                                            </CardContent>
+                                        </Card>
+                                    ))}
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
 
-                        {/* KPI Charts */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:col-span-3">
-                            <Card>
-                                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                                    <div className="space-y-1">
-                                        <CardDescription>Total Revenue</CardDescription>
-                                        <CardTitle className="text-xl">$2,847,500</CardTitle>
-                                    </div>
-                                    <TrendingUp className="h-4 w-4 text-gray-500" />
-                                </CardHeader>
-                            </Card>
-                            <Card>
-                                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                                    <div className="space-y-1">
-                                        <CardDescription>Operational Costs</CardDescription>
-                                        <CardTitle className="text-xl">$1,625,000</CardTitle>
-                                    </div>
-                                    <TrendingUp className="h-4 w-4 text-gray-500" />
-                                </CardHeader>
-                            </Card>
-                            <Card>
-                                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                                    <div className="space-y-1">
-                                        <CardDescription>Net Profit</CardDescription>
-                                        <CardTitle className="text-xl">$1,222,500</CardTitle>
-                                    </div>
-                                    <Package className="h-4 w-4 text-gray-500" />
-                                </CardHeader>
-                            </Card>
-                        </div>
-
-                        {/* Charts Section */}
-                        <Card className="lg:col-span-2">
+                    {/* Charts */}
+                    <div className="lg:col-span-3 grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <Card className="lg:col-span-2 rounded-3xl border-none shadow-md ring-1 ring-border bg-card/60 backdrop-blur-sm">
                             <CardHeader>
-                                <CardTitle className="text-base">Inventory Turnover by Category</CardTitle>
-                            </CardHeader>
-                            <CardContent className="h-[300px]">
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <BarChart data={inventoryData}>
-                                        <XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
-                                        <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `$${value} `} />
-                                        <Tooltip />
-                                        <Bar dataKey="value" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-                                    </BarChart>
-                                </ResponsiveContainer>
-                            </CardContent>
-                        </Card>
-
-                        <Card className="lg:col-span-1">
-                            <CardHeader>
-                                <CardTitle className="text-base">Sales vs. Material Costs</CardTitle>
+                                <CardTitle className="text-lg">Revenue Trend</CardTitle>
                             </CardHeader>
                             <CardContent className="h-[300px]">
                                 <ResponsiveContainer width="100%" height="100%">
                                     <LineChart data={salesData}>
-                                        <XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
-                                        <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
-                                        <Tooltip />
-                                        <Line type="monotone" dataKey="sales" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
-                                        <Line type="monotone" dataKey="costs" stroke="#888888" strokeWidth={2} dot={false} strokeDasharray="5 5" />
+                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+                                        <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
+                                        <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `$${value}`} />
+                                        <Tooltip
+                                            contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', borderRadius: '8px', color: 'hsl(var(--foreground))' }}
+                                        />
+                                        <Line type="monotone" dataKey="sales" stroke="hsl(var(--primary))" strokeWidth={3} dot={{ r: 4, strokeWidth: 2 }} activeDot={{ r: 6 }} />
+                                        <Line type="monotone" dataKey="costs" stroke="hsl(var(--muted-foreground))" strokeWidth={2} dot={false} strokeDasharray="5 5" />
                                     </LineChart>
                                 </ResponsiveContainer>
                             </CardContent>
                         </Card>
-
+                        <Card className="lg:col-span-1 rounded-3xl border-none shadow-md ring-1 ring-border bg-card/60 backdrop-blur-sm">
+                            <CardHeader>
+                                <CardTitle className="text-lg">Inventory Distribution</CardTitle>
+                            </CardHeader>
+                            <CardContent className="h-[300px]">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <BarChart data={inventoryData}>
+                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+                                        <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
+                                        <Tooltip
+                                            cursor={{ fill: 'transparent' }}
+                                            contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', borderRadius: '8px', color: 'hsl(var(--foreground))' }}
+                                        />
+                                        <Bar dataKey="value" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} barSize={40} />
+                                    </BarChart>
+                                </ResponsiveContainer>
+                            </CardContent>
+                        </Card>
                     </div>
                 </div>
             </main>
 
             <Dialog open={!!trackingOrder} onOpenChange={(open) => !open && setTrackingOrder(null)}>
-                <DialogContent className="sm:max-w-[700px]">
+                <DialogContent className="sm:max-w-[700px] rounded-2xl">
                     <DialogHeader>
                         <DialogTitle>Tracking Details - {trackingOrder?.id}</DialogTitle>
                     </DialogHeader>
@@ -684,37 +452,37 @@ export default function Dashboard({ onLogout, onNavigateToDetail }: { onLogout: 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-4">
                         {/* Left Col: Timeline */}
                         <div>
-                            <h4 className="text-xs font-semibold text-muted-foreground mb-4 uppercase tracking-wider">Shipment Progress</h4>
-                            <div className="space-y-6 relative pl-2 border-l ml-2">
+                            <h4 className="text-xs font-semibold text-muted-foreground mb-6 uppercase tracking-wider">Shipment Progress</h4>
+                            <div className="space-y-8 relative pl-2 border-l-2 ml-2 border-muted">
                                 {trackingSteps.map((step, idx) => (
-                                    <div key={idx} className="relative pl-6">
-                                        <div className={`absolute -left-[5px] top-1.5 h-2.5 w-2.5 rounded-full ring-4 ring-background ${step.completed ? "bg-primary" : "bg-muted"} ${step.alert ? "bg-destructive" : ""}`} />
+                                    <div key={idx} className="relative pl-8">
+                                        <div className={`absolute -left-[9px] top-1 h-4 w-4 rounded-full border-4 border-background ${step.completed ? "bg-foreground" : "bg-muted-foreground"} ${step.alert ? "bg-red-500" : ""}`} />
                                         <p className="text-sm font-medium">{step.status}</p>
-                                        <p className="text-xs text-muted-foreground mt-0.5">{step.date} · {step.location}</p>
+                                        <p className="text-xs text-muted-foreground mt-1">{step.date} · {step.location}</p>
                                     </div>
                                 ))}
                             </div>
                         </div>
 
                         {/* Right Col: Georeference & Actions */}
-                        <div className="flex flex-col h-full">
-                            <h4 className="text-xs font-semibold text-muted-foreground mb-4 uppercase tracking-wider">Delivery Location</h4>
+                        <div className="flex flex-col h-full gap-4">
+                            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Delivery Location</h4>
 
                             {/* Map Placeholder */}
-                            <div className="bg-muted rounded-lg h-40 w-full mb-4 flex items-center justify-center border">
+                            <div className="bg-muted/40 rounded-xl h-40 w-full flex items-center justify-center border-2 border-dashed">
                                 <div className="text-center">
-                                    <MapPin className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                                    <span className="text-xs text-muted-foreground block">Map Preview Unavailable</span>
+                                    <MapPin className="h-8 w-8 text-muted-foreground mx-auto mb-2 opacity-50" />
+                                    <span className="text-xs text-muted-foreground block font-medium">Map Preview Unavailable</span>
                                 </div>
                             </div>
 
-                            <div className="bg-muted/50 p-3 rounded-lg border mb-6">
-                                <p className="text-xs font-medium">Distribution Center NY-05</p>
+                            <div className="bg-card p-4 rounded-xl border shadow-sm">
+                                <p className="text-sm font-semibold">Distribution Center NY-05</p>
                                 <p className="text-xs text-muted-foreground mt-1">45 Industrial Park Dr, Brooklyn, NY 11201</p>
                             </div>
 
-                            <div className="mt-auto pt-6 border-t">
-                                <Button className="w-full" onClick={() => console.log('Contact')}>
+                            <div className="mt-auto pt-4 border-t">
+                                <Button className="w-full rounded-full" onClick={() => console.log('Contact')}>
                                     <Mail className="mr-2 h-4 w-4" />
                                     Contact Support
                                 </Button>
@@ -723,6 +491,41 @@ export default function Dashboard({ onLogout, onNavigateToDetail }: { onLogout: 
                     </div>
                 </DialogContent>
             </Dialog>
-        </div >
+        </div>
+    )
+}
+
+function NavItem({ icon, label, isActive }: { icon: any, label: string, isActive?: boolean }) {
+    return (
+        <Button
+            variant="ghost"
+            className={`rounded-full h-9 transition-all duration-300 gap-2 px-3 overflow-hidden ${isActive ? "bg-secondary text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted/50"}`}
+        >
+            {icon}
+            <span className={`text-sm font-medium transition-all duration-300 ${isActive ? "opacity-100 max-w-[100px]" : "opacity-0 max-w-0 md:group-hover:opacity-100 md:group-hover:max-w-[100px]"}`}>
+                {label}
+            </span>
+        </Button>
+    )
+}
+
+function KPICard({ title, value, trend, trendUp, trendAlert, icon }: any) {
+    return (
+        <Card className="border-none shadow-sm bg-card/60 backdrop-blur-sm ring-1 ring-border rounded-2xl">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardDescription className="font-semibold text-xs uppercase tracking-wider">{title}</CardDescription>
+                <div className="p-2 bg-muted rounded-lg text-muted-foreground">
+                    {icon}
+                </div>
+            </CardHeader>
+            <CardContent>
+                <div className="text-2xl font-bold">{value}</div>
+                <div className={`text-xs flex items-center gap-1 font-medium mt-1 ${trendAlert ? "text-red-500" : (trendUp ? "text-green-600" : "text-muted-foreground")}`}>
+                    {trendAlert && <AlertCircle className="h-3 w-3" />}
+                    {trendUp && <TrendingUp className="h-3 w-3" />}
+                    {trend}
+                </div>
+            </CardContent>
+        </Card>
     )
 }
