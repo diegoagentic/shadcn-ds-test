@@ -1,116 +1,217 @@
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Building2, Eye, AlertTriangle, ArrowRight, ShieldCheck } from "lucide-react"
+import { Eye, ArrowRight, Building2, ChevronDown, CheckCircle2, Check } from "lucide-react"
+import { useState } from "react"
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+
+const organizations = [
+    { name: 'Strata Manufacturing HQ', users: 245, type: 'Primary workspace' },
+    { name: 'Strata Sales Division', users: 120, type: 'Regional hub' },
+    { name: 'Strata Logistics Link', users: 85, type: 'Distribution center' }
+]
 
 export default function Login({ onLoginSuccess }: { onLoginSuccess: () => void }) {
+    const [isRegistering, setIsRegistering] = useState(false)
+    const [showPassword, setShowPassword] = useState(false)
+    const [selectedOrg, setSelectedOrg] = useState(organizations[0])
+
+    const handleAction = () => {
+        onLoginSuccess()
+    }
+
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4 font-sans text-gray-900">
-            <Card className="w-full max-w-[480px] shadow-xl border-gray-200 bg-white">
-                <CardHeader className="space-y-4 text-center pb-2">
-                    <div className="mx-auto w-32 h-16 bg-gray-200 flex items-center justify-center text-gray-400 text-xs tracking-widest uppercase font-semibold">
-                        Client Logo
+        <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 font-sans bg-zinc-50 dark:bg-zinc-950 transition-colors duration-300">
+            {/* Left Side - Branding */}
+            <div className="relative overflow-hidden flex flex-col justify-center p-12 lg:p-20 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white transition-colors duration-300">
+                {/* Decorative background */}
+                <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-zinc-100/50 to-zinc-200/50 dark:from-zinc-800/20 dark:to-zinc-950/20 pointer-events-none" />
+
+                <div className="relative z-10 max-w-lg space-y-8">
+                    <div className="flex items-center gap-3 mb-8">
+                        <img src="/logo-on-light.jpg" alt="Strata" className="h-8 w-auto block dark:hidden" />
+                        <img src="/logo-on-dark.jpg" alt="Strata" className="h-8 w-auto hidden dark:block" />
                     </div>
-                    <div className="space-y-1">
-                        <CardTitle className="text-2xl font-normal text-gray-900">Sign In</CardTitle>
-                        <CardDescription className="text-gray-500">Access your workspace</CardDescription>
+
+                    <h1 className="text-4xl lg:text-5xl font-bold leading-tight text-zinc-900 dark:text-white">
+                        Transform your workflow with Strata
+                    </h1>
+
+                    <p className="text-lg text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                        At Strata, we provide comprehensive solutions for contract dealers and manufacturers, combining sales enablement, financial services, and expert consulting with cutting-edge technology to optimize operations and drive business growth.
+                    </p>
+
+                    <div className="flex flex-wrap gap-4 pt-4">
+                        <Button className="bg-zinc-900 dark:bg-white hover:bg-zinc-800 dark:hover:bg-zinc-200 text-white dark:text-black rounded-full px-8 py-6 text-base h-auto transition-colors">
+                            Talk to an Expert <ArrowRight className="ml-2 h-4 w-4" />
+                        </Button>
+                        <Button variant="outline" className="bg-transparent text-zinc-900 dark:text-white border-zinc-300 dark:border-white/30 hover:bg-zinc-100 dark:hover:bg-white/10 rounded-full px-8 py-6 text-base h-auto transition-colors">
+                            Browse all Services
+                        </Button>
                     </div>
-                </CardHeader>
-                <CardContent className="space-y-5">
-                    {/* Error Alert */}
-                    <Alert variant="destructive" className="bg-gray-50 border-gray-200 text-gray-900 [&>svg]:text-gray-900">
-                        <AlertTriangle className="h-4 w-4" />
-                        <AlertTitle className="font-semibold text-sm">Authentication Failed for selected Organization</AlertTitle>
-                        <AlertDescription className="text-xs text-gray-600">
-                            Please check your credentials and organization selection
-                        </AlertDescription>
-                    </Alert>
+                </div>
+            </div>
 
-                    <div className="space-y-4">
-                        {/* Organization Select */}
-                        <div className="space-y-2">
-                            <Label htmlFor="org">Select Organization</Label>
-                            <Select defaultValue="hq">
-                                <SelectTrigger id="org" className="h-12 border-gray-300">
-                                    <SelectValue placeholder="Choose your workspace..." />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="hq" className="py-3">
-                                        <div className="flex items-center gap-3 w-full">
-                                            <div className="bg-gray-100 p-1 rounded"><Building2 className="h-4 w-4 text-gray-600" /></div>
-                                            <div className="flex flex-col text-left">
-                                                <span className="font-medium text-gray-900">Strata Manufacturing HQ</span>
-                                                <span className="text-xs text-gray-500">Primary workspace • 245 users</span>
-                                            </div>
-                                            <span className="ml-auto flex h-2 w-2 rounded-full bg-green-500" />
-                                        </div>
-                                    </SelectItem>
-                                    <SelectItem value="west" className="py-3">
-                                        <div className="flex items-center gap-3 w-full">
-                                            <div className="bg-gray-100 p-1 rounded"><Building2 className="h-4 w-4 text-gray-600" /></div>
-                                            <div className="flex flex-col text-left">
-                                                <span className="font-medium text-gray-900">Strata West Coast Division</span>
-                                                <span className="text-xs text-gray-500">Regional office • 89 users</span>
-                                            </div>
-                                            <span className="ml-auto flex h-2 w-2 rounded-full bg-gray-300" />
-                                        </div>
-                                    </SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
+            {/* Right Side - Form */}
+            <div className="flex items-center justify-center p-8 relative overflow-hidden bg-[url('/login-bg.jpg')] bg-cover bg-center">
+                {/* Dark Overlay */}
+                <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
 
-                        {/* Email Input */}
+                <div className="w-full max-w-[440px] p-8 rounded-2xl bg-white/10 dark:bg-black/40 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-2xl relative z-10 transition-all duration-300">
+                    <div className="space-y-6">
                         <div className="space-y-2">
-                            <Label htmlFor="email">Work Email</Label>
-                            <Input id="email" type="email" defaultValue="maria.gonzalez@estrata.com" className="h-12 border-gray-300" />
-                        </div>
-
-                        {/* Password Input */}
-                        <div className="space-y-2">
-                            <Label htmlFor="password">Password</Label>
-                            <div className="relative">
-                                <Input id="password" type="password" defaultValue="SecurePass2025!" className="h-12 border-gray-300 pr-10" />
-                                <button className="absolute right-3 top-3 text-gray-500 hover:text-gray-700">
-                                    <Eye className="h-5 w-5" />
+                            <h2 className="text-3xl font-bold text-white">
+                                {isRegistering ? 'Create Account' : 'Welcome Back!'}
+                            </h2>
+                            <div className="flex flex-wrap gap-1 text-sm text-zinc-200 dark:text-zinc-300">
+                                <span>{isRegistering ? 'Already have an account?' : "Don't have an account?"}</span>
+                                <button
+                                    onClick={() => setIsRegistering(!isRegistering)}
+                                    className="font-medium text-white hover:underline decoration-white/50 underline-offset-4"
+                                >
+                                    {isRegistering ? 'Login now' : 'Create a new account now,'}
                                 </button>
+                                {!isRegistering && <span>it's FREE! Takes less than a minute.</span>}
                             </div>
                         </div>
 
-                        {/* Password Requirements */}
-                        <div className="bg-gray-50 p-3 rounded-md border border-gray-100 space-y-2">
-                            <div className="flex items-center gap-2 text-xs text-gray-500 font-medium">
-                                <AlertTriangle className="h-3 w-3" /> Password must contain:
+                        <div className="space-y-5">
+                            {!isRegistering && (
+                                <>
+                                    <Button variant="outline" className="w-full h-12 text-base font-medium text-white bg-white/10 border-white/20 dark:border-white/10 hover:bg-white/20 justify-center gap-3 transition-colors" onClick={handleAction}>
+                                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-5 h-5" style={{ filter: 'brightness(0.9) contrast(1.2)' }} />
+                                        Login with Google
+                                    </Button>
+
+                                    <div className="relative">
+                                        <div className="absolute inset-0 flex items-center">
+                                            <span className="w-full border-t border-white/20" />
+                                        </div>
+                                        <div className="relative flex justify-center text-xs uppercase">
+                                            <span className="bg-transparent px-2 text-zinc-300 font-medium tracking-wider">Or login with email</span>
+                                        </div>
+                                    </div>
+                                </>
+                            )}
+
+                            <div className="space-y-4">
+                                {isRegistering && (
+                                    <div className="space-y-2">
+                                        <Label className="text-zinc-200 dark:text-zinc-300">Select Organization</Label>
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <div className="group cursor-pointer rounded-xl border border-white/20 bg-white/10 p-3 hover:bg-white/20 transition-colors">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/10 shrink-0">
+                                                            <Building2 className="h-5 w-5 text-gray-200" />
+                                                        </div>
+                                                        <div className="flex-1 overflow-hidden">
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="font-semibold text-sm text-white truncate">{selectedOrg.name}</span>
+                                                                <span className="h-2 w-2 rounded-full bg-emerald-500 shrink-0"></span>
+                                                            </div>
+                                                            <div className="text-xs text-zinc-400 truncate">{selectedOrg.type} • {selectedOrg.users} users</div>
+                                                        </div>
+                                                        <ChevronDown className="h-5 w-5 text-zinc-400" />
+                                                    </div>
+                                                </div>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent className="w-[380px] bg-zinc-900 border-white/10 text-white">
+                                                {organizations.map((org, index) => (
+                                                    <DropdownMenuItem key={index} onClick={() => setSelectedOrg(org)} className="focus:bg-white/10 cursor-pointer">
+                                                        <div className="flex items-center gap-3 w-full p-2">
+                                                            <div className="h-8 w-8 bg-white/10 rounded flex items-center justify-center shrink-0">
+                                                                <Building2 className="h-4 w-4 text-zinc-400" />
+                                                            </div>
+                                                            <div>
+                                                                <div className="font-medium text-sm">{org.name}</div>
+                                                                <div className="text-xs text-zinc-400">{org.type}</div>
+                                                            </div>
+                                                        </div>
+                                                    </DropdownMenuItem>
+                                                ))}
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
+                                    </div>
+                                )}
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="email" className="text-zinc-200 dark:text-zinc-300">{isRegistering ? 'Work Email' : 'Email'}</Label>
+                                    <Input
+                                        id="email"
+                                        placeholder="name@example.com"
+                                        type="email"
+                                        defaultValue="hisalim.ux@gmail.com"
+                                        className="h-12 bg-white/10 border-white/20 dark:border-white/10 text-white placeholder:text-zinc-400 focus:border-white/40 focus-visible:ring-0"
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="password" className="text-zinc-200 dark:text-zinc-300">Password</Label>
+                                    <div className="relative">
+                                        <Input
+                                            id="password"
+                                            type={showPassword ? "text" : "password"}
+                                            placeholder="Password"
+                                            defaultValue="Password123!"
+                                            className="h-12 bg-white/10 border-white/20 dark:border-white/10 text-white placeholder:text-zinc-400 focus:border-white/40 focus-visible:ring-0 pr-10"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            className="absolute right-3 top-3 text-zinc-300 hover:text-white"
+                                        >
+                                            <Eye className="h-5 w-5" />
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {isRegistering && (
+                                    <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-4">
+                                        <div className="flex gap-2">
+                                            <CheckCircle2 className="h-4 w-4 text-emerald-500 mt-0.5" />
+                                            <div className="text-xs text-emerald-400">
+                                                <p className="font-medium text-emerald-200 mb-1">Password requirements met:</p>
+                                                <ul className="space-y-1">
+                                                    <li className="flex items-center gap-2">
+                                                        <Check className="h-3 w-3 text-emerald-500" />
+                                                        <span>Minimum 8 characters</span>
+                                                    </li>
+                                                    <li className="flex items-center gap-2">
+                                                        <Check className="h-3 w-3 text-emerald-500" />
+                                                        <span>At least one uppercase letter</span>
+                                                    </li>
+                                                    <li className="flex items-center gap-2">
+                                                        <Check className="h-3 w-3 text-emerald-500" />
+                                                        <span>At least one number</span>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
-                            <ul className="text-[10px] text-gray-500 space-y-1 pl-1">
-                                <li className="flex items-center gap-1.5"><div className="h-1 w-1 rounded-full bg-gray-400" /> Minimum 8 characters</li>
-                                <li className="flex items-center gap-1.5"><div className="h-1 w-1 rounded-full bg-gray-400" /> At least one uppercase letter</li>
-                                <li className="flex items-center gap-1.5"><div className="h-1 w-1 rounded-full bg-gray-400" /> At least one number</li>
-                                <li className="flex items-center gap-1.5"><div className="h-1 w-1 rounded-full bg-gray-400" /> At least one special character (!@#$%)</li>
-                            </ul>
+
+                            <Button className="w-full h-12 bg-white text-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-200 font-bold text-base shadow-lg shadow-black/10 transition-colors" onClick={handleAction}>
+                                {isRegistering ? 'Create Account' : 'Login Now'}
+                            </Button>
+
+                            {!isRegistering && (
+                                <div className="text-center">
+                                    <button className="text-sm font-medium text-zinc-300 hover:text-white">
+                                        Forget password <span className="text-white underline decoration-zinc-400 underline-offset-4 hover:text-white">Click here</span>
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
-                </CardContent>
-                <CardFooter className="flex flex-col space-y-4">
-                    <Button onClick={onLoginSuccess} className="w-full h-11 bg-gray-900 hover:bg-gray-800 text-white font-medium" size="lg">
-                        <ArrowRight className="mr-2 h-4 w-4" /> Log In
-                    </Button>
-                    <button className="text-sm text-gray-500 hover:text-gray-700 hover:underline">
-                        Forgot Password?
-                    </button>
-                    <div className="w-full pt-4 mt-2 border-t border-gray-100 flex items-center justify-between text-xs text-gray-400">
-                        <div className="flex gap-3">
-                            <span className="hover:text-gray-600 cursor-pointer">Need access?</span>
-                            <span className="hover:text-gray-600 cursor-pointer">Contact Admin</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                            <ShieldCheck className="h-3 w-3" /> Secure Login
-                        </div>
-                    </div>
-                </CardFooter>
-            </Card>
+                </div>
+            </div>
         </div>
     )
 }

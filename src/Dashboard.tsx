@@ -60,7 +60,7 @@ const trackingSteps = [
 ]
 
 export default function Dashboard({ onLogout, onNavigateToDetail }: { onLogout: () => void, onNavigateToDetail: () => void }) {
-    const [viewMode, setViewMode] = useState<'list' | 'grid'>('list')
+    const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
     const [isMainOpen, setIsMainOpen] = useState(true)
     const [isOperationsOpen, setIsOperationsOpen] = useState(true)
 
@@ -93,8 +93,9 @@ export default function Dashboard({ onLogout, onNavigateToDetail }: { onLogout: 
             {/* Sidebar - Using standard Tailwind for layout structure */}
             <aside className="w-64 bg-card border-r border-border hidden md:flex flex-col">
                 <div className="h-16 flex items-center px-6 border-b border-border">
-                    <div className="w-24 h-8 bg-muted flex items-center justify-center text-[10px] tracking-widest text-muted-foreground font-bold uppercase">
-                        Tenant Logo
+                    <div className="h-8 flex items-center">
+                        <img src="/logo-on-light.jpg" alt="Strata" className="h-full w-auto block dark:hidden" />
+                        <img src="/logo-on-dark.jpg" alt="Strata" className="h-full w-auto hidden dark:block" />
                     </div>
                 </div>
                 <nav className="flex-1 p-4 space-y-4 overflow-y-auto">
