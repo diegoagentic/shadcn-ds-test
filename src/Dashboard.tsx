@@ -21,8 +21,8 @@ import {
     Search, Bell, Plus, Copy, FileText, Send, Layout,
     Package, TrendingUp, AlertCircle, ShoppingCart, Truck,
     ChevronRight, MoreHorizontal, CalendarIcon,
-    LayoutGrid, List, LogOut, ChevronDown, Eye, Pencil, Trash2, Mail, User, MapPin, CheckCircle, Clock,
-    Home, Cuboid, BarChart3, ClipboardList
+    LayoutGrid, List, LogOut, ChevronDown, ChevronUp, Eye, Pencil, Trash2, Mail, User, MapPin, CheckCircle, Clock,
+    Home, Cuboid, BarChart3, ClipboardList, Activity, AlertTriangle
 } from "lucide-react"
 import { ModeToggle } from './components/mode-toggle'
 import {
@@ -63,8 +63,10 @@ const trackingSteps = [
 export default function Dashboard({ onLogout, onNavigateToDetail }: { onLogout: () => void, onNavigateToDetail: () => void }) {
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
     const [searchQuery, setSearchQuery] = useState('')
+    const [isAppsOpen, setIsAppsOpen] = useState(false)
     const [selectedStatuses, setSelectedStatuses] = useState<string[]>([])
     const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
+    const [showMetrics, setShowMetrics] = useState(false)
     const [trackingOrder, setTrackingOrder] = useState<any>(null)
 
     const toggleExpand = (id: string) => {
@@ -112,6 +114,47 @@ export default function Dashboard({ onLogout, onNavigateToDetail }: { onLogout: 
 
                     {/* Actions */}
                     <div className="flex items-center pr-2 gap-2">
+                        <div className="relative">
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="rounded-full h-8 w-8 text-muted-foreground hover:text-foreground transition-colors"
+                                onClick={() => setIsAppsOpen(!isAppsOpen)}
+                            >
+                                <LayoutGrid className="h-4 w-4" />
+                            </Button>
+
+                            {isAppsOpen && (
+                                <>
+                                    <div
+                                        className="fixed inset-0 z-40 bg-transparent"
+                                        onClick={() => setIsAppsOpen(false)}
+                                    />
+                                    <div className="fixed top-[90px] left-1/2 -translate-x-1/2 w-[400px] p-4 bg-white/85 dark:bg-zinc-950/85 backdrop-blur-xl border border-white/20 shadow-2xl rounded-3xl z-50 animate-in fade-in zoom-in-95 duration-200">
+                                        <div className="grid grid-cols-3 gap-4">
+                                            {[
+                                                { icon: <Home className="h-8 w-8" />, label: "Portal", color: "text-blue-500 bg-blue-50 dark:bg-blue-500/10" },
+                                                { icon: <User className="h-8 w-8" />, label: "CRM", color: "text-purple-500 bg-purple-50 dark:bg-purple-500/10" },
+                                                { icon: <FileText className="h-8 w-8" />, label: "Invoice", color: "text-green-500 bg-green-50 dark:bg-green-500/10" },
+                                                { icon: <Cuboid className="h-8 w-8" />, label: "Inventory", color: "text-orange-500 bg-orange-50 dark:bg-orange-500/10" },
+                                                { icon: <BarChart3 className="h-8 w-8" />, label: "Analytics", color: "text-pink-500 bg-pink-50 dark:bg-pink-500/10" },
+                                                { icon: <Activity className="h-8 w-8" />, label: "Support", color: "text-cyan-500 bg-cyan-50 dark:bg-cyan-500/10" },
+                                                { icon: <Layout className="h-8 w-8" />, label: "Board", color: "text-indigo-500 bg-indigo-50 dark:bg-indigo-500/10" },
+                                                { icon: <LogOut className="h-8 w-8" />, label: "Calendar", color: "text-red-500 bg-red-50 dark:bg-red-500/10" },
+                                                { icon: <MoreHorizontal className="h-8 w-8" />, label: "More", color: "text-gray-500 bg-gray-50 dark:bg-gray-500/10" },
+                                            ].map((app, i) => (
+                                                <button key={i} className="flex flex-col items-center gap-2 p-3 hover:bg-black/5 dark:hover:bg-white/10 rounded-2xl transition-all group">
+                                                    <div className={`p-3 rounded-2xl ${app.color} group-hover:scale-110 transition-transform shadow-sm`}>
+                                                        {app.icon}
+                                                    </div>
+                                                    <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground">{app.label}</span>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </>
+                            )}
+                        </div>
                         <ModeToggle />
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -143,9 +186,11 @@ export default function Dashboard({ onLogout, onNavigateToDetail }: { onLogout: 
                 {/* Header */}
                 <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                     <div>
-                        <h1 className="text-3xl font-semibold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-foreground to-muted-foreground">
-                            Operational Overview
-                        </h1>
+                        <div className="flex items-center gap-2">
+                            <h1 className="text-3xl font-semibold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-foreground to-muted-foreground">
+                                Operational Overview
+                            </h1>
+                        </div>
                         <p className="text-muted-foreground mt-1">Jan 1 - Jan 31, 2025</p>
                     </div>
                     <div className="flex items-center gap-3">
@@ -160,35 +205,129 @@ export default function Dashboard({ onLogout, onNavigateToDetail }: { onLogout: 
                 </div>
 
                 {/* KPI Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <KPICard title="Total Inventory" value="$1.2M" trend="+0.2% vs last month" trendUp icon={<Cuboid className="h-4 w-4" />} />
-                    <KPICard title="Efficiency" value="88%" trend="+3.5% vs last month" trendUp icon={<BarChart3 className="h-4 w-4" />} />
-                    <KPICard title="Pending Orders" value="142" trend="-12 vs yesterday" icon={<ClipboardList className="h-4 w-4" />} />
-                    <KPICard title="Low Stock" value="15" trend="Requires attention" trendAlert icon={<AlertCircle className="h-4 w-4" />} />
-                </div>
-
-                {/* Quick Actions */}
-                <div className="mb-8 overflow-x-auto">
-                    <div className="flex items-center gap-6 min-w-max">
-                        <h2 className="text-lg font-medium text-muted-foreground">Quick Actions</h2>
-                        <div className="flex items-center gap-4">
-                            {[
-                                { icon: <Plus className="w-5 h-5" />, label: "New Order" },
-                                { icon: <Copy className="w-5 h-5" />, label: "Duplicate" },
-                                { icon: <FileText className="w-5 h-5" />, label: "Export PDF" },
-                                { icon: <Send className="w-5 h-5" />, label: "Send Email" },
-                                { icon: <Copy className="w-5 h-5" />, label: "Templates" },
-                            ].map((action, i) => (
-                                <button key={i} className="flex flex-col items-center gap-2 group">
-                                    <div className="w-12 h-12 rounded-full bg-card border border-dashed border-border flex items-center justify-center text-muted-foreground group-hover:border-primary group-hover:bg-primary/10 group-hover:text-primary transition-all shadow-sm">
-                                        {action.icon}
-                                    </div>
-                                    <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors">{action.label}</span>
-                                </button>
-                            ))}
+                {/* KPI Cards */}
+                {showMetrics ? (
+                    <>
+                        <div className="flex justify-end mb-2">
+                            <Button variant="ghost" size="sm" onClick={() => setShowMetrics(false)} className="gap-2 text-muted-foreground hover:text-foreground">
+                                Hide Details <ChevronUp className="h-4 w-4" />
+                            </Button>
                         </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-in fade-in zoom-in duration-300">
+                            <Card className="bg-card/60 backdrop-blur-sm border-white/10 shadow-sm hover:shadow-md transition-all">
+                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                    <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Total Inventory</CardTitle>
+                                    <Package className="h-4 w-4 text-primary" />
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="text-2xl font-bold">$1.2M</div>
+                                    <div className="text-xs text-muted-foreground flex items-center mt-1">
+                                        <Plus className="h-3 w-3 text-green-500 mr-1" />
+                                        <span className="text-green-500 font-medium">+0.2%</span> vs last month
+                                    </div>
+                                </CardContent>
+                            </Card>
+                            <Card className="bg-card/60 backdrop-blur-sm border-white/10 shadow-sm hover:shadow-md transition-all">
+                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                    <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Efficiency</CardTitle>
+                                    <Activity className="h-4 w-4 text-purple-500" />
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="text-2xl font-bold">88%</div>
+                                    <div className="text-xs text-muted-foreground flex items-center mt-1">
+                                        <Plus className="h-3 w-3 text-green-500 mr-1" />
+                                        <span className="text-green-500 font-medium">+3.5%</span> vs last month
+                                    </div>
+                                </CardContent>
+                            </Card>
+                            <Card className="bg-card/60 backdrop-blur-sm border-white/10 shadow-sm hover:shadow-md transition-all">
+                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                    <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Pending Orders</CardTitle>
+                                    <ShoppingCart className="h-4 w-4 text-orange-500" />
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="text-2xl font-bold">142</div>
+                                    <div className="text-xs text-muted-foreground flex items-center mt-1">
+                                        <span className="font-medium">-12</span> vs yesterday
+                                    </div>
+                                </CardContent>
+                            </Card>
+                            <Card className="bg-card/60 backdrop-blur-sm border-white/10 shadow-sm hover:shadow-md transition-all">
+                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                    <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Low Stock</CardTitle>
+                                    <Truck className="h-4 w-4 text-red-500" />
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="text-2xl font-bold">15</div>
+                                    <div className="text-xs text-red-500 flex items-center mt-1">
+                                        Requires attention
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </div>
+
+                        <div className="flex items-center gap-4 mt-6 animate-in fade-in slide-in-from-top-2 duration-500">
+                            <span className="text-sm font-medium text-muted-foreground">Quick Actions:</span>
+                            <div className="flex gap-2">
+                                <Button variant="outline" size="sm" className="gap-2 rounded-full">
+                                    <Plus className="h-4 w-4" /> New Order
+                                </Button>
+                                <Button variant="outline" size="sm" className="gap-2 rounded-full">
+                                    <Copy className="h-4 w-4" /> Duplicate
+                                </Button>
+                                <Button variant="outline" size="sm" className="gap-2 rounded-full">
+                                    <FileText className="h-4 w-4" /> Export PDF
+                                </Button>
+                                <Button variant="outline" size="sm" className="gap-2 rounded-full">
+                                    <Send className="h-4 w-4" /> Email
+                                </Button>
+                            </div>
+                        </div>
+                    </>
+                ) : (
+                    <div className="bg-card/40 backdrop-blur-md rounded-2xl p-4 border border-border shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4 animate-in fade-in slide-in-from-top-4 duration-300">
+                        <div className="flex items-center gap-6 overflow-x-auto w-full scrollbar-hide">
+                            <div className="flex items-center gap-2 whitespace-nowrap">
+                                <span className="text-sm text-muted-foreground">Inventory:</span>
+                                <span className="text-lg font-semibold">$1.2M</span>
+                                <Badge variant="secondary" className="text-green-600 bg-green-500/10 hover:bg-green-500/20 px-1 py-0 text-[10px]">+0.2%</Badge>
+                            </div>
+                            <Separator orientation="vertical" className="h-8 hidden sm:block" />
+                            <div className="flex items-center gap-2 whitespace-nowrap">
+                                <span className="text-sm text-muted-foreground">Efficiency:</span>
+                                <span className="text-lg font-semibold">88%</span>
+                                <Badge variant="secondary" className="text-green-600 bg-green-500/10 hover:bg-green-500/20 px-1 py-0 text-[10px]">+3.5%</Badge>
+                            </div>
+                            <Separator orientation="vertical" className="h-8 hidden sm:block" />
+                            <div className="flex items-center gap-2 whitespace-nowrap">
+                                <span className="text-sm text-muted-foreground">Pending:</span>
+                                <span className="text-lg font-semibold">142</span>
+                            </div>
+                            <Separator orientation="vertical" className="h-8 hidden sm:block" />
+                            <div className="flex items-center gap-2 whitespace-nowrap">
+                                <span className="text-sm text-muted-foreground">Low Stock:</span>
+                                <span className="text-lg font-semibold">15</span>
+                                <Badge variant="destructive" className="px-1 py-0 text-[10px]">Alert</Badge>
+                            </div>
+                        </div>
+
+                        <Separator orientation="vertical" className="h-12 hidden xl:block mx-2" />
+
+                        <div className="flex items-center gap-3 overflow-x-auto min-w-max pl-4 border-l xl:border-none xl:pl-0">
+                            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" title="New Order"><Plus className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" title="Copy"><Copy className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" title="Export"><FileText className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" title="Email"><Send className="h-4 w-4" /></Button>
+                        </div>
+
+                        <Separator orientation="vertical" className="h-12 hidden xl:block mx-2" />
+                        <Button variant="ghost" size="icon" onClick={() => setShowMetrics(true)} className="h-8 w-8 rounded-full" title="Show Details">
+                            <ChevronDown className="h-4 w-4" />
+                        </Button>
                     </div>
-                </div>
+                )}
+
+
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Orders Table */}
@@ -372,9 +511,25 @@ export default function Dashboard({ onLogout, onNavigateToDetail }: { onLogout: 
                                                         </div>
                                                     </div>
                                                     <div onClick={(e) => e.stopPropagation()}>
-                                                        <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground">
-                                                            <MoreHorizontal className="h-4 w-4" />
-                                                        </Button>
+                                                        <div className="flex items-center gap-1">
+                                                            <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground" onClick={(e) => { e.stopPropagation(); onNavigateToDetail(); }}>
+                                                                <Eye className="h-4 w-4" />
+                                                            </Button>
+                                                            <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground" onClick={(e) => e.stopPropagation()}>
+                                                                <Pencil className="h-4 w-4" />
+                                                            </Button>
+                                                            <DropdownMenu>
+                                                                <DropdownMenuTrigger asChild>
+                                                                    <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground">
+                                                                        <MoreHorizontal className="h-4 w-4" />
+                                                                    </Button>
+                                                                </DropdownMenuTrigger>
+                                                                <DropdownMenuContent align="end">
+                                                                    <DropdownMenuItem><Trash2 className="mr-2 h-4 w-4" /> Delete</DropdownMenuItem>
+                                                                    <DropdownMenuItem><Mail className="mr-2 h-4 w-4" /> Contact</DropdownMenuItem>
+                                                                </DropdownMenuContent>
+                                                            </DropdownMenu>
+                                                        </div>
                                                     </div>
                                                 </div>
                                                 <Separator />
@@ -388,8 +543,51 @@ export default function Dashboard({ onLogout, onNavigateToDetail }: { onLogout: 
                                                     <Badge variant="outline" className="w-full justify-center py-1 font-normal bg-background/50">{order.status}</Badge>
                                                 </div>
                                                 {expandedIds.has(order.id) && (
-                                                    <div className="pt-2">
-                                                        <Button className="w-full h-8 text-xs" onClick={(e) => { e.stopPropagation(); setTrackingOrder(order); }}>Track Order</Button>
+                                                    <div className="pt-4 mt-4 border-t border-border">
+                                                        <div className="flex flex-col md:flex-row gap-8">
+                                                            <div className="flex-1 space-y-4">
+                                                                <div className="flex items-center gap-3">
+                                                                    <Avatar className="h-8 w-8 border border-border">
+                                                                        <AvatarFallback className="bg-muted text-muted-foreground"><User className="h-4 w-4" /></AvatarFallback>
+                                                                    </Avatar>
+                                                                    <div>
+                                                                        <p className="text-sm font-semibold">Sarah Johnson</p>
+                                                                        <p className="text-xs text-muted-foreground">Project Manager</p>
+                                                                    </div>
+                                                                </div>
+
+                                                                <Separator />
+
+                                                                <div className="relative py-2">
+                                                                    <div className="absolute top-3 left-0 w-full h-[2px] bg-muted" />
+                                                                    <div className="relative z-10 flex justify-between">
+                                                                        {['Placed', 'Mfg', 'Qual', 'Ship'].map((step, i) => (
+                                                                            <div key={i} className="flex flex-col items-center bg-card px-1">
+                                                                                <div className={`h-6 w-6 rounded-full flex items-center justify-center ${i <= 1 ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
+                                                                                    {i < 1 ? <CheckCircle className="h-4 w-4" /> : <div className={`h-2 w-2 rounded-full ${i <= 1 ? 'bg-background' : 'bg-background/50'}`} />}
+                                                                                </div>
+                                                                                <span className={`mt-2 text-xs font-medium ${i <= 1 ? 'text-primary' : 'text-muted-foreground'}`}>{step}</span>
+                                                                            </div>
+                                                                        ))}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <div className="w-full md:w-[280px]">
+                                                                <div className="rounded-xl border border-orange-200 bg-orange-50 p-4 dark:border-orange-900/50 dark:bg-orange-900/20">
+                                                                    <div className="flex gap-3">
+                                                                        <AlertTriangle className="h-5 w-5 text-orange-600 dark:text-orange-400 shrink-0" />
+                                                                        <div>
+                                                                            <h5 className="text-sm font-bold text-orange-800 dark:text-orange-300">Alert: Customs Delay</h5>
+                                                                            <p className="mt-1 text-xs text-orange-700/80 dark:text-orange-400/80">Held at port. ETA +24h.</p>
+                                                                            <Button variant="link" className="p-0 h-auto text-xs text-blue-600 dark:text-blue-400 mt-2" onClick={(e) => { e.stopPropagation(); setTrackingOrder(order); }}>
+                                                                                Track Shipment
+                                                                            </Button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 )}
                                             </CardContent>
@@ -441,7 +639,7 @@ export default function Dashboard({ onLogout, onNavigateToDetail }: { onLogout: 
                         </Card>
                     </div>
                 </div>
-            </main>
+            </main >
 
             <Dialog open={!!trackingOrder} onOpenChange={(open) => !open && setTrackingOrder(null)}>
                 <DialogContent className="sm:max-w-[700px] rounded-2xl">
@@ -491,7 +689,7 @@ export default function Dashboard({ onLogout, onNavigateToDetail }: { onLogout: 
                     </div>
                 </DialogContent>
             </Dialog>
-        </div>
+        </div >
     )
 }
 
