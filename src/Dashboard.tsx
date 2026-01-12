@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -13,6 +13,13 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
     BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, CartesianGrid
@@ -48,9 +55,10 @@ const salesData = [
 ]
 
 const recentOrders = [
-    { id: "#ORD-2055", customer: "AutoManfacture Co.", amount: "$385,000", status: "Pending Review", date: "Dec 20, 2025", avatar: "SJ" },
-    { id: "#ORD-2054", customer: "TechDealer Solutions", amount: "$62,500", status: "In Production", date: "Nov 15, 2025", avatar: "MW" },
-    { id: "#ORD-2053", customer: "Urban Living Inc.", amount: "$112,000", status: "Shipped", date: "Oct 30, 2025", avatar: "UC" },
+    { id: "#ORD-2055", customer: "AutoManfacture Co.", client: "AutoManfacture Co.", project: "Office Renovation", amount: "$385,000", status: "Pending Review", date: "Dec 20, 2025", initials: "AC", avatar: "SJ" },
+    { id: "#ORD-2054", customer: "TechDealer Solutions", client: "TechDealer Solutions", project: "HQ Upgrade", amount: "$62,500", status: "In Production", date: "Nov 15, 2025", initials: "TS", avatar: "MW" },
+    { id: "#ORD-2053", customer: "Urban Living Inc.", client: "Urban Living Inc.", project: "Lobby Refresh", amount: "$112,000", status: "Shipped", date: "Oct 30, 2025", initials: "UL", avatar: "UC" },
+    { id: "#ORD-2052", customer: "Global Logistics", client: "Global Logistics", project: "Warehouse Expansion", amount: "$45,000", status: "Delivered", date: "Oct 15, 2025", initials: "GL", avatar: "GL" },
 ]
 
 const trackingSteps = [
@@ -64,7 +72,26 @@ export default function Dashboard({ onLogout, onNavigateToDetail }: { onLogout: 
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
     const [searchQuery, setSearchQuery] = useState('')
     const [isAppsOpen, setIsAppsOpen] = useState(false)
-    const [selectedStatuses, setSelectedStatuses] = useState<string[]>([])
+    const [selectedClient, setSelectedClient] = useState('All Clients')
+    const [selectedProject, setSelectedProject] = useState('All Projects')
+    const [activeTab, setActiveTab] = useState<'active' | 'completed' | 'all'>('active')
+
+    const clients = ['All Clients', ...Array.from(new Set(recentOrders.map(o => o.client)))]
+
+    const availableProjects = useMemo(() => {
+        if (selectedClient === 'All Clients') {
+            return ['All Projects', ...Array.from(new Set(recentOrders.map(o => o.project)))]
+        }
+        return ['All Projects', ...Array.from(new Set(recentOrders.filter(o => o.client === selectedClient).map(o => o.project)))]
+    }, [selectedClient])
+
+    useEffect(() => {
+        if (selectedClient !== 'All Clients' && availableProjects.length > 1) {
+            setSelectedProject(availableProjects[1])
+        } else {
+            setSelectedProject('All Projects')
+        }
+    }, [selectedClient, availableProjects])
     const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
     const [showMetrics, setShowMetrics] = useState(false)
     const [trackingOrder, setTrackingOrder] = useState<any>(null)
@@ -83,10 +110,30 @@ export default function Dashboard({ onLogout, onNavigateToDetail }: { onLogout: 
         return recentOrders.filter(order => {
             const matchesSearch = order.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 order.customer.toLowerCase().includes(searchQuery.toLowerCase())
-            const matchesStatus = selectedStatuses.length === 0 || selectedStatuses.includes(order.status)
-            return matchesSearch && matchesStatus
+
+            const matchesProject = selectedProject === 'All Projects' || order.project === selectedProject
+            const matchesClient = selectedClient === 'All Clients' || order.client === selectedClient
+
+            let matchesTab = true;
+            const isCompleted = ['Delivered', 'Completed'].includes(order.status);
+
+            if (activeTab === 'active') { // Active
+                matchesTab = !isCompleted
+            } else if (activeTab === 'completed') { // Completed
+                matchesTab = isCompleted
+            }
+
+            return matchesSearch && matchesProject && matchesClient && matchesTab
         })
-    }, [searchQuery, selectedStatuses])
+    }, [searchQuery, selectedProject, selectedClient, activeTab])
+
+    const counts = useMemo(() => {
+        return {
+            active: recentOrders.filter(o => !['Delivered', 'Completed'].includes(o.status)).length,
+            completed: recentOrders.filter(o => ['Delivered', 'Completed'].includes(o.status)).length,
+            all: recentOrders.length
+        }
+    }, [])
 
     return (
         <div className="min-h-screen bg-background font-sans text-foreground pb-12">
@@ -332,12 +379,57 @@ export default function Dashboard({ onLogout, onNavigateToDetail }: { onLogout: 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Orders Table */}
                     <Card className="lg:col-span-3 border-none shadow-md bg-card/50 backdrop-blur-sm rounded-3xl overflow-hidden ring-1 ring-border">
-                        <CardHeader className="flex flex-row items-center justify-between border-b bg-muted/20 px-6 py-4">
-                            <div className="flex items-center gap-3">
+                        <CardHeader className="flex flex-col md:flex-row items-center justify-between border-b bg-muted/20 px-6 py-4 gap-4">
+                            <div className="flex flex-col gap-2">
                                 <CardTitle className="text-lg">Recent Orders</CardTitle>
-                                <Badge variant="secondary" className="rounded-full">Active</Badge>
+                                {/* Custom Tabs */}
+                                <div className="flex p-1 bg-muted rounded-lg">
+                                    {[
+                                        { id: 'active', label: 'Active', count: counts.active },
+                                        { id: 'completed', label: 'Completed', count: counts.completed },
+                                        { id: 'all', label: 'All', count: counts.all }
+                                    ].map((tab) => (
+                                        <button
+                                            key={tab.id}
+                                            onClick={() => setActiveTab(tab.id as any)}
+                                            className={`
+                                                flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md transition-all
+                                                ${activeTab === tab.id
+                                                    ? 'bg-background text-foreground shadow-sm'
+                                                    : 'text-muted-foreground hover:bg-background/50 hover:text-foreground'
+                                                }
+                                            `}
+                                        >
+                                            {tab.label}
+                                            <span className={`text-xs px-1.5 py-0.5 rounded-full ${activeTab === tab.id ? 'bg-muted' : 'bg-background'}`}>
+                                                {tab.count}
+                                            </span>
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
-                            <div className="flex items-center gap-3">
+
+                            <div className="flex flex-wrap items-center gap-3">
+                                <Select value={selectedClient} onValueChange={setSelectedClient}>
+                                    <SelectTrigger className="w-[140px] h-8 text-xs">
+                                        <SelectValue placeholder="Client" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {clients.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                                    </SelectContent>
+                                </Select>
+
+                                <Select value={selectedProject} onValueChange={setSelectedProject}>
+                                    <SelectTrigger className="w-[140px] h-8 text-xs">
+                                        <SelectValue placeholder="Project" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {availableProjects.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}
+                                    </SelectContent>
+                                </Select>
+
+                                <div className="h-6 w-px bg-border hidden md:block" />
+
                                 <div className="flex items-center gap-1 bg-muted/50 rounded-lg p-1">
                                     <Button
                                         variant={viewMode === 'list' ? 'secondary' : 'ghost'}
@@ -356,33 +448,6 @@ export default function Dashboard({ onLogout, onNavigateToDetail }: { onLogout: 
                                         <LayoutGrid className="h-4 w-4" />
                                     </Button>
                                 </div>
-                                <Popover>
-                                    <PopoverTrigger asChild>
-                                        <Button variant="outline" size="sm" className="h-8 gap-2 rounded-lg text-xs font-medium uppercase tracking-wide">Status <ChevronDown className="h-3 w-3" /></Button>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-56 p-2" align="end">
-                                        <div className="space-y-2">
-                                            {['Pending Review', 'In Production', 'Shipped'].map((status) => (
-                                                <div key={status} className="flex items-center space-x-2">
-                                                    <Checkbox
-                                                        id={status}
-                                                        checked={selectedStatuses.includes(status)}
-                                                        onCheckedChange={(checked) => {
-                                                            if (checked) {
-                                                                setSelectedStatuses([...selectedStatuses, status])
-                                                            } else {
-                                                                setSelectedStatuses(selectedStatuses.filter(s => s !== status))
-                                                            }
-                                                        }}
-                                                    />
-                                                    <label htmlFor={status} className="text-sm font-medium leading-none cursor-pointer">{status}</label>
-                                                </div>
-                                            ))}
-                                            <Separator className="my-2" />
-                                            <Button variant="ghost" size="sm" className="w-full h-8 px-2 text-xs" onClick={() => setSelectedStatuses([])}>Clear Filter</Button>
-                                        </div>
-                                    </PopoverContent>
-                                </Popover>
                             </div>
                         </CardHeader>
                         <CardContent className="p-0">
