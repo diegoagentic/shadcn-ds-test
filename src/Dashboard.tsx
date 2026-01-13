@@ -29,7 +29,7 @@ import {
     Package, TrendingUp, AlertCircle, ShoppingCart, Truck,
     ChevronRight, MoreHorizontal, CalendarIcon,
     LayoutGrid, List, LogOut, ChevronDown, ChevronUp, Eye, Pencil, Trash2, Mail, User, MapPin, CheckCircle, Clock,
-    Home, Cuboid, BarChart3, ClipboardList, Activity, AlertTriangle
+    Home, Cuboid, BarChart3, ClipboardList, Activity, AlertTriangle, Currency as CurrencyDollarIcon
 } from "lucide-react"
 import { ModeToggle } from './components/mode-toggle'
 import {
@@ -74,7 +74,7 @@ export default function Dashboard({ onLogout, onNavigateToDetail }: { onLogout: 
     const [isAppsOpen, setIsAppsOpen] = useState(false)
     const [selectedClient, setSelectedClient] = useState('All Clients')
     const [selectedProject, setSelectedProject] = useState('All Projects')
-    const [activeTab, setActiveTab] = useState<'active' | 'completed' | 'all'>('active')
+    const [activeTab, setActiveTab] = useState<'metrics' | 'active' | 'completed' | 'all'>('active')
 
     const clients = ['All Clients', ...Array.from(new Set(recentOrders.map(o => o.client)))]
 
@@ -92,6 +92,7 @@ export default function Dashboard({ onLogout, onNavigateToDetail }: { onLogout: 
             setSelectedProject('All Projects')
         }
     }, [selectedClient, availableProjects])
+
     const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
     const [showMetrics, setShowMetrics] = useState(false)
     const [trackingOrder, setTrackingOrder] = useState<any>(null)
@@ -121,11 +122,36 @@ export default function Dashboard({ onLogout, onNavigateToDetail }: { onLogout: 
                 matchesTab = !isCompleted
             } else if (activeTab === 'completed') { // Completed
                 matchesTab = isCompleted
+            } else if (activeTab === 'metrics') {
+                matchesTab = true // Metrics view handles its own data, this filter is for the table if shown
             }
 
             return matchesSearch && matchesProject && matchesClient && matchesTab
         })
     }, [searchQuery, selectedProject, selectedClient, activeTab])
+
+    // Dynamic Metrics Data based on current filters (Client/Project)
+    const metricsData = useMemo(() => {
+        const dataToAnalyze = recentOrders.filter(order => {
+            const matchesProject = selectedProject === 'All Projects' || order.project === selectedProject
+            const matchesClient = selectedClient === 'All Clients' || order.client === selectedClient
+            return matchesProject && matchesClient
+        })
+
+        const totalValue = dataToAnalyze.reduce((sum, order) => {
+            return sum + parseInt(order.amount.replace(/[^0-9]/g, ''))
+        }, 0)
+
+        const activeCount = dataToAnalyze.filter(o => !['Delivered', 'Completed'].includes(o.status)).length
+        const completedCount = dataToAnalyze.filter(o => ['Delivered', 'Completed'].includes(o.status)).length
+
+        return {
+            revenue: totalValue.toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 }),
+            activeOrders: activeCount,
+            completedOrders: completedCount,
+            efficiency: dataToAnalyze.length > 0 ? Math.round((completedCount / dataToAnalyze.length) * 100) : 0
+        }
+    }, [selectedProject, selectedClient])
 
     const counts = useMemo(() => {
         return {
@@ -387,7 +413,8 @@ export default function Dashboard({ onLogout, onNavigateToDetail }: { onLogout: 
                                     {[
                                         { id: 'active', label: 'Active', count: counts.active },
                                         { id: 'completed', label: 'Completed', count: counts.completed },
-                                        { id: 'all', label: 'All', count: counts.all }
+                                        { id: 'all', label: 'All', count: counts.all },
+                                        { id: 'metrics', label: 'Metrics', count: null }
                                     ].map((tab) => (
                                         <button
                                             key={tab.id}
@@ -400,10 +427,13 @@ export default function Dashboard({ onLogout, onNavigateToDetail }: { onLogout: 
                                                 }
                                             `}
                                         >
+                                            {tab.id === 'metrics' && <BarChart3 className="h-4 w-4 mr-1" />}
                                             {tab.label}
-                                            <span className={`text-xs px-1.5 py-0.5 rounded-full ${activeTab === tab.id ? 'bg-muted' : 'bg-background'}`}>
-                                                {tab.count}
-                                            </span>
+                                            {tab.count !== null && (
+                                                <span className={`text-xs px-1.5 py-0.5 rounded-full ${activeTab === tab.id ? 'bg-muted' : 'bg-background'}`}>
+                                                    {tab.count}
+                                                </span>
+                                            )}
                                         </button>
                                     ))}
                                 </div>
@@ -451,7 +481,77 @@ export default function Dashboard({ onLogout, onNavigateToDetail }: { onLogout: 
                             </div>
                         </CardHeader>
                         <CardContent className="p-0">
-                            {viewMode === 'list' ? (
+                            {activeTab === 'metrics' ? (
+                                <div className="p-6">
+                                    <div className="flex items-center justify-between mb-6">
+                                        <div>
+                                            <h3 className="text-lg font-semibold tracking-tight">Performance Metrics</h3>
+                                            <p className="text-sm text-muted-foreground">
+                                                {selectedClient === 'All Clients' ? 'Overview across all clients' : `Showing analytics for ${selectedClient}`}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-in fade-in zoom-in-95 duration-300">
+                                        <Card className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/10 dark:to-emerald-900/10 border-green-200 dark:border-green-800/20">
+                                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                                <CardTitle className="text-sm font-medium text-green-700 dark:text-green-400">Total Revenue</CardTitle>
+                                                <CurrencyDollarIcon className="h-4 w-4 text-green-600 dark:text-green-400" />
+                                            </CardHeader>
+                                            <CardContent>
+                                                <div className="text-2xl font-bold text-green-700 dark:text-green-300">{metricsData.revenue}</div>
+                                                <p className="text-xs text-green-600/80 dark:text-green-400/80 mt-1">Based on visible orders</p>
+                                            </CardContent>
+                                        </Card>
+                                        <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/10 dark:to-indigo-900/10 border-blue-200 dark:border-blue-800/20">
+                                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                                <CardTitle className="text-sm font-medium text-blue-700 dark:text-blue-400">Active Orders</CardTitle>
+                                                <ShoppingCart className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                                            </CardHeader>
+                                            <CardContent>
+                                                <div className="text-2xl font-bold text-blue-700 dark:text-blue-300">{metricsData.activeOrders}</div>
+                                                <p className="text-xs text-blue-600/80 dark:text-blue-400/80 mt-1">In production or pending</p>
+                                            </CardContent>
+                                        </Card>
+                                        <Card className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/10 dark:to-pink-900/10 border-purple-200 dark:border-purple-800/20">
+                                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                                <CardTitle className="text-sm font-medium text-purple-700 dark:text-purple-400">Completion Rate</CardTitle>
+                                                <Activity className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                                            </CardHeader>
+                                            <CardContent>
+                                                <div className="text-2xl font-bold text-purple-700 dark:text-purple-300">{metricsData.efficiency}%</div>
+                                                <p className="text-xs text-purple-600/80 dark:text-purple-400/80 mt-1">Orders delivered successfully</p>
+                                            </CardContent>
+                                        </Card>
+                                        <Card className="bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-900/10 dark:to-amber-900/10 border-orange-200 dark:border-orange-800/20">
+                                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                                <CardTitle className="text-sm font-medium text-orange-700 dark:text-orange-400">Project Count</CardTitle>
+                                                <ClipboardList className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+                                            </CardHeader>
+                                            <CardContent>
+                                                <div className="text-2xl font-bold text-orange-700 dark:text-orange-300">
+                                                    {availableProjects.length > 0 && availableProjects[0] === 'All Projects' ? availableProjects.length - 1 : availableProjects.length}
+                                                </div>
+                                                <p className="text-xs text-orange-600/80 dark:text-orange-400/80 mt-1">Active projects</p>
+                                            </CardContent>
+                                        </Card>
+                                    </div>
+
+                                    <div className="mt-8 h-[300px] w-full">
+                                        <h4 className="text-md font-medium mb-4">Monthly Trends</h4>
+                                        <ResponsiveContainer width="100%" height="100%">
+                                            <BarChart data={salesData}>
+                                                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                                                <XAxis dataKey="name" className="text-xs text-muted-foreground" />
+                                                <YAxis className="text-xs text-muted-foreground" />
+                                                <Tooltip
+                                                    contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.8)', borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                                                />
+                                                <Bar dataKey="sales" fill="currentColor" className="fill-primary" radius={[4, 4, 0, 0]} />
+                                            </BarChart>
+                                        </ResponsiveContainer>
+                                    </div>
+                                </div>
+                            ) : viewMode === 'list' ? (
                                 <Table>
                                     <TableHeader className="bg-muted/30">
                                         <TableRow className="hover:bg-transparent">

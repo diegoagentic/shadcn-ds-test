@@ -84,8 +84,8 @@ export default function Login({ onLoginSuccess }: { onLoginSuccess: () => void }
                             {!isRegistering && (
                                 <>
                                     <Button variant="outline" className="w-full h-12 text-base font-medium text-white bg-white/10 border-white/20 dark:border-white/10 hover:bg-white/20 justify-center gap-3 transition-colors" onClick={handleAction}>
-                                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-5 h-5" style={{ filter: 'brightness(0.9) contrast(1.2)' }} />
-                                        Login with Google
+                                        <svg className="w-5 h-5" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg"><path fill="#f25022" d="M1 1h9v9H1z" /><path fill="#7fba00" d="M11 1h9v9h-9z" /><path fill="#00a4ef" d="M1 11h9v9H1z" /><path fill="#ffb900" d="M11 11h9v9h-9z" /></svg>
+                                        Login with Microsoft
                                     </Button>
 
                                     <div className="relative">
