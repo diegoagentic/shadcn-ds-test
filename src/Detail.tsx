@@ -34,7 +34,11 @@ import {
     Repeat,
     Clock,
     PenTool,
-    Check
+    Check,
+    Loader2,
+    AlertTriangle,
+    Pencil,
+    RefreshCw
 } from 'lucide-react'
 import { Checkbox } from "@/components/ui/checkbox"
 import {
@@ -85,56 +89,310 @@ const items = [
     { id: "SKU-OFF-2025-008", name: "Bench Seating 3-Seat", category: "Waiting Series", properties: "Metal / Chrome", stock: 28, status: "Low Stock" },
 ]
 
-const messages = [
-    {
-        id: 1,
-        sender: "System",
-        avatar: "",
-        content: "Order #ORD-2055 has been flagged for manual review due to stock discrepancy.",
-        time: "2 hours ago",
-        type: "system",
-    },
-    {
-        id: 2,
-        sender: "AI Assistant",
-        avatar: "AI",
-        content: "I've detected a 5-item discrepancy between local and remote warehouse counts for SKU-OFF-2025-003. Recommended action: Synchronize with Warehouse DB or perform manual count.",
-        time: "2 hours ago",
-        type: "ai",
-    },
-    {
-        id: 3,
-        sender: "Sarah Chen",
-        avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
-        content: "@InventoryManager I'm verifying the physical stock in Zone B. Will update shortly.",
-        time: "1 hour ago",
-        type: "user",
-    },
-    {
-        id: 4,
-        sender: "Sarah Chen",
-        avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
-        content: "I've contacted the client. They want to proceed with the available items. I've updated the order line items accordingly.",
-        time: "15 mins ago",
-        type: "user",
-    },
-    {
-        id: 5,
-        sender: "System",
-        avatar: "",
-        content: "Sarah Chen triggered context action: Process Quote",
-        time: "Just now",
-        type: "system",
-    },
-    {
-        id: 6,
-        sender: "AI Assistant",
-        avatar: "AI",
-        content: "Quote processing initiated. Analyzing updated line items and generating revised PDF...",
-        time: "Just now",
-        type: "ai",
+interface Message {
+    id: number | string;
+    sender: string;
+    avatar: string;
+    content: React.ReactNode;
+    time: string;
+    type: 'system' | 'ai' | 'user' | 'action_processing' | 'action_success';
+}
+
+const DiscrepancyResolutionFlow = () => {
+    const [status, setStatus] = useState<'initial' | 'requesting' | 'pending' | 'approved'>('initial')
+    const [requestText, setRequestText] = useState('')
+
+    const handleRequest = () => {
+        setStatus('pending')
+        setTimeout(() => setStatus('approved'), 3000)
     }
-]
+
+    if (status === 'initial') {
+        return (
+            <div className="flex flex-col gap-3">
+                <div className="flex items-center gap-2 text-orange-600 dark:text-orange-400 font-semibold">
+                    <AlertTriangle className="h-4 w-4" />
+                    <span>Found 3 discrepancies in recent shipments.</span>
+                </div>
+                <div className="pl-4 flex flex-col gap-1 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-2">
+                        <AlertTriangle className="h-3 w-3 text-orange-500" />
+                        <span>Order #ORD-2054: Weight mismatch</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <AlertTriangle className="h-3 w-3 text-orange-500" />
+                        <span>Order #ORD-2051: Timestamp sync error</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <AlertTriangle className="h-3 w-3 text-orange-500" />
+                        <span>Order #ORD-2048: Missing carrier update</span>
+                    </div>
+                </div>
+                <div className="flex gap-2 mt-1">
+                    <Button size="sm" variant="outline" className="h-7 text-xs bg-blue-50 text-blue-600 hover:bg-blue-100 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800">
+                        <RefreshCw className="mr-1 h-3 w-3" /> Sync & Report
+                    </Button>
+                    <Button
+                        size="sm" variant="outline" className="h-7 text-xs"
+                        onClick={() => setStatus('requesting')}
+                    >
+                        <Pencil className="mr-1 h-3 w-3" /> Request Changes
+                    </Button>
+                </div>
+            </div>
+        )
+    }
+
+    if (status === 'requesting') {
+        return (
+            <div className="flex flex-col gap-3 animate-in fade-in slide-in-from-bottom-2">
+                <span className="text-sm font-medium">Describe required changes:</span>
+                <textarea
+                    className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    placeholder="E.g., Update weight for ORD-2054 to 48kg..."
+                    value={requestText}
+                    onChange={(e) => setRequestText(e.target.value)}
+                />
+                <div className="flex justify-between items-center">
+                    <Button size="sm" variant="ghost" className="h-8 text-xs text-muted-foreground">
+                        <Paperclip className="mr-1 h-3 w-3" /> Attach File
+                    </Button>
+                    <div className="flex gap-2">
+                        <Button size="sm" variant="ghost" onClick={() => setStatus('initial')} className="h-8 text-xs">Cancel</Button>
+                        <Button size="sm" onClick={handleRequest} className="h-8 text-xs bg-blue-600 hover:bg-blue-700 text-white">Submit Request</Button>
+                    </div>
+                </div>
+            </div>
+        )
+    }
+
+    if (status === 'pending') {
+        return (
+            <div className="flex flex-col gap-3 animate-in fade-in">
+                <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
+                    <RefreshCw className="h-4 w-4 animate-spin" />
+                    <span>Requesting approval from Logistics Manager...</span>
+                </div>
+            </div>
+        )
+    }
+
+    if (status === 'approved') {
+        return (
+            <div className="flex flex-col gap-3 animate-in fade-in">
+                <div className="flex items-center gap-2 text-green-600 dark:text-green-400 font-semibold">
+                    <CheckCircle className="h-4 w-4" />
+                    <span>Changes approved. PO updated.</span>
+                </div>
+                <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg border border-border">
+                    <div className="h-8 w-8 bg-red-100 dark:bg-red-900/20 rounded flex items-center justify-center text-red-500">
+                        <FileText className="h-4 w-4" />
+                    </div>
+                    <div className="flex-1">
+                        <p className="text-sm font-medium">PO_Revised_Final.pdf</p>
+                        <p className="text-xs text-muted-foreground">Updated just now</p>
+                    </div>
+                    <Button size="sm" variant="ghost" className="h-7 text-xs text-blue-500 hover:text-blue-600">Download</Button>
+                </div>
+            </div>
+        )
+    }
+    return null
+}
+
+// ... (existing code, need to verify imports or check context if Loader2 is needed)
+
+
+
+// (I am making an assumption about imports here. If Loader2 is not imported I should add it. 
+// I will check the file imports first or just try to replace the messages map and hope for the best or use existing icons.)
+// Actually, I should use `replace_file_content` carefully. 
+// Let's stick to the messages array replacement first, but I need to replace the rendering loop which is further down in the file.
+// The `replace_file_content` I'm constructing replaces the array AND the loop.
+// Note: Shadcn mostly uses lucide-react. I see imports in the file view from step 742:
+// import { ... Clock, PenTool, Check } from 'lucide-react'
+// I need `Loader2`. I should probably add it to imports first or just use `RefreshCcw` or `RotateCw` if available, but `Loader2` is standard shadcn.
+
+
+
+const DiscrepancyActionCard = ({ msg }: { msg: Message }) => {
+    const [isRequesting, setIsRequesting] = useState(false)
+    const [requestText, setRequestText] = useState('')
+    const [status, setStatus] = useState<'initial' | 'pending' | 'approved'>('initial')
+
+    const handleSubmit = () => {
+        setStatus('pending')
+        setTimeout(() => {
+            setStatus('approved')
+            setIsRequesting(false)
+        }, 2000)
+    }
+
+    if (status === 'pending') {
+        return (
+            <div className="p-3 rounded-lg bg-green-50 text-foreground border border-green-200 dark:bg-green-900 dark:border-green-700">
+                <div className="flex items-center gap-2">
+                    <RefreshCw className="h-4 w-4 text-green-600 dark:text-green-400 animate-spin" />
+                    <span className="text-sm font-medium text-green-700 dark:text-green-400">Requesting approval...</span>
+                </div>
+            </div>
+        )
+    }
+
+    if (status === 'approved') {
+        return (
+            <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2">
+                <div className="p-3 rounded-lg bg-green-50 text-foreground border border-green-200 dark:bg-green-900 dark:border-green-700">
+                    <div className="flex items-center gap-2 mb-2">
+                        <Badge variant="outline" className="border-green-200 text-green-600 bg-green-100 dark:bg-green-800 dark:border-green-600 dark:text-green-300">Action Updated</Badge>
+                    </div>
+                    <div className="flex items-center gap-2 text-green-600 dark:text-green-400 font-medium mb-3">
+                        <CheckCircle2 className="h-5 w-5" />
+                        <p>Changes approved. PO updated.</p>
+                    </div>
+                    <div className="flex items-center gap-3 bg-secondary/50 p-3 rounded-md border border-border">
+                        <div className="h-10 w-10 flex items-center justify-center bg-background rounded border border-border/50">
+                            <FileText className="h-5 w-5 text-red-500" />
+                        </div>
+                        <div className="flex-1">
+                            <p className="text-sm font-medium">PO_Revised_Final.pdf</p>
+                            <p className="text-xs text-muted-foreground">2.4 MB • Generated just now</p>
+                        </div>
+                        <Button size="icon" variant="ghost">
+                            <Download className="h-4 w-4" />
+                        </Button>
+                    </div>
+                </div>
+            </div>
+        )
+    }
+
+    return (
+        <div className={`p-3 rounded-lg border transition-all duration-300 ${isRequesting ? 'bg-background ring-2 ring-primary/20 border-primary' : 'bg-green-50 text-foreground border-green-200 dark:bg-green-900 dark:border-green-700'}`}>
+            {!isRequesting ? (
+                <>
+                    <div className="flex items-center gap-2 mb-2">
+                        <Badge variant="outline" className="border-green-200 text-green-600 bg-green-100 dark:bg-green-800 dark:border-green-600 dark:text-green-300">Success</Badge>
+                    </div>
+                    <p className="text-sm mb-2">{msg.content}</p>
+
+                    <div className="space-y-3 mt-3">
+                        {/* PDF File */}
+                        <div className="flex items-center gap-3 bg-secondary/50 p-3 rounded-md border border-border">
+                            <div className="h-10 w-10 flex items-center justify-center bg-background rounded border border-border/50">
+                                <FileText className="h-5 w-5 text-primary" />
+                            </div>
+                            <div className="flex-1">
+                                <p className="text-sm font-medium">PO_ORD-2055_Final.pdf</p>
+                                <p className="text-xs text-muted-foreground">2.4 MB • Generated just now</p>
+                            </div>
+                            <Button size="icon" variant="ghost">
+                                <Download className="h-4 w-4" />
+                            </Button>
+                        </div>
+
+                        {/* Attention Selection */}
+                        <div className="pl-4 border-l-4 border-amber-500 py-2 my-4">
+                            <div className="flex items-start gap-3">
+                                <div className="flex-1">
+                                    <p className="text-sm font-semibold text-foreground flex items-center gap-2">
+                                        <AlertTriangle className="h-4 w-4 text-amber-500" />
+                                        Attention Needed
+                                    </p>
+                                    <p className="text-sm text-foreground mt-1">
+                                        Discrepancy detected for <span className="font-semibold">SKU-OFF-2025-003</span>:
+                                    </p>
+                                    <div className="mt-2 flex items-center gap-4 text-xs font-medium">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-muted-foreground uppercase tracking-wider text-[10px]">Warehouse</span>
+                                            <span className="text-foreground font-mono text-sm bg-muted px-1.5 py-0.5 rounded">42</span>
+                                        </div>
+                                        <div className="h-4 w-px bg-border"></div>
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-muted-foreground uppercase tracking-wider text-[10px]">Local</span>
+                                            <span className="text-foreground font-mono text-sm bg-muted px-1.5 py-0.5 rounded">35</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="flex items-center gap-2">
+                            <Button size="sm">
+                                Sync Database
+                            </Button>
+                            <Button size="sm" variant="outline">
+                                Resolve Manually
+                            </Button>
+                            <Button
+                                size="sm"
+                                variant="ghost"
+                                className="gap-2 text-muted-foreground ml-auto hover:text-primary"
+                                onClick={() => setIsRequesting(true)}
+                            >
+                                <Pencil className="h-3.5 w-3.5" />
+                                Request Changes
+                            </Button>
+                        </div>
+
+                        <div className="bg-secondary/50 p-3 rounded-md border border-border">
+                            <p className="text-xs font-semibold text-muted-foreground mb-2 uppercase">AI Summary</p>
+                            <div className="space-y-1">
+                                <div className="flex items-start gap-2 text-xs text-foreground">
+                                    <Check className="h-4 w-4 text-green-500 mt-0.5" />
+                                    <span>Updated SKU-OFF-2025-003 stock count to 42</span>
+                                </div>
+                                <div className="flex items-start gap-2 text-xs text-foreground">
+                                    <Check className="h-4 w-4 text-green-500 mt-0.5" />
+                                    <span>Applied 5% bulk discount for &gt;500 units</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </>
+            ) : (
+                <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2">
+                    <div className="flex items-center justify-between">
+                        <h4 className="text-sm font-semibold">Describe required changes:</h4>
+                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setIsRequesting(false)}>
+                            <X className="h-4 w-4" />
+                        </Button>
+                    </div>
+                    <textarea
+                        className="w-full text-sm bg-muted/50 border border-input rounded-md p-3 placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        placeholder="E.g., Update weight for ORD-2054 to 48kg..."
+                        rows={3}
+                        autoFocus
+                        value={requestText}
+                        onChange={(e) => setRequestText(e.target.value)}
+                    />
+                    <div className="flex items-center justify-between">
+                        <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground">
+                            <Paperclip className="h-3.5 w-3.5" />
+                            Attach File
+                        </Button>
+                        <div className="flex items-center gap-2">
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setIsRequesting(false)}
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                size="sm"
+                                onClick={handleSubmit}
+                            >
+                                Submit Request
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    )
+}
 
 const collaborators = [
     { name: "Sarah Chen", role: "Logistics Mgr", status: "online", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" },
@@ -148,6 +406,64 @@ const documents = [
 ]
 
 export default function Detail({ onBack }: { onBack: () => void }) {
+    const [messages, setMessages] = useState<Message[]>([
+        {
+            id: 1,
+            sender: "System",
+            avatar: "",
+            content: "Order #ORD-2055 has been flagged for manual review due to stock discrepancy.",
+            time: "2 hours ago",
+            type: "system",
+        },
+        {
+            id: 2,
+            sender: "AI Assistant",
+            avatar: "AI",
+            content: <DiscrepancyResolutionFlow />,
+            time: "2 hours ago",
+            type: "ai",
+        },
+        {
+            id: 3,
+            sender: "Sarah Chen",
+            avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+            content: "@InventoryManager I'm verifying the physical stock in Zone B. Will update shortly.",
+            time: "1 hour ago",
+            type: "user",
+        },
+        {
+            id: 4,
+            sender: "Sarah Chen",
+            avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+            content: "I've contacted the client. They want to proceed with the available items. I've updated the order line items accordingly.",
+            time: "15 mins ago",
+            type: "user",
+        },
+        {
+            id: 5,
+            sender: "System",
+            avatar: "",
+            content: "Sarah Chen triggered context action: Process Quote",
+            time: "Just now",
+            type: "system",
+        },
+        {
+            id: 6,
+            sender: "AI Assistant",
+            avatar: "AI",
+            content: "Quote processing initiated. Analyzing updated line items and generating revised PDF...",
+            time: "Just now",
+            type: "action_processing",
+        },
+        {
+            id: 7,
+            sender: "AI Assistant",
+            avatar: "AI",
+            content: "Analysis complete. I've generated the revised Purchase Order, but found stock discrepancies that require attention.",
+            time: "Just now",
+            type: "action_success",
+        }
+    ])
     const [selectedItem, setSelectedItem] = useState(items[0])
     const [sections, setSections] = useState({
         quickActions: true,
@@ -1023,6 +1339,14 @@ export default function Detail({ onBack }: { onBack: () => void }) {
                                                             <div className="flex items-center justify-center h-8 w-8 rounded-full bg-muted">
                                                                 <Repeat className="h-4 w-4 text-muted-foreground" />
                                                             </div>
+                                                        ) : msg.type === 'action_processing' ? (
+                                                            <div className="flex items-center justify-center h-8 w-8 rounded-full bg-blue-100 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 animate-pulse">
+                                                                <FileText className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                                                            </div>
+                                                        ) : msg.type === 'action_success' ? (
+                                                            <div className="flex items-center justify-center h-8 w-8 rounded-full bg-green-100 dark:bg-green-900/30 border border-green-200 dark:border-green-800">
+                                                                <Check className="h-4 w-4 text-green-600 dark:text-green-400" />
+                                                            </div>
                                                         ) : (
                                                             <Avatar className={`h-8 w-8 ${msg.type === 'ai' ? 'border border-purple-200' : ''}`}>
                                                                 <AvatarImage src={msg.avatar === 'AI' ? undefined : msg.avatar} />
@@ -1036,8 +1360,25 @@ export default function Detail({ onBack }: { onBack: () => void }) {
                                                     <div className="space-y-1 max-w-[80%]">
                                                         {msg.type === 'system' ? (
                                                             <p className="text-sm text-muted-foreground">
-                                                                <span className="font-semibold">{msg.sender}</span> {msg.content.replace('System ', '')}
+                                                                <span className="font-semibold">{msg.sender}</span> {typeof msg.content === 'string' ? msg.content.replace('System ', '') : msg.content}
                                                             </p>
+                                                        ) : msg.type === 'action_processing' ? (
+                                                            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 p-3 rounded-lg text-sm shadow-sm">
+                                                                <div className="flex items-center gap-2 mb-1">
+                                                                    <span className="text-sm font-semibold text-blue-700 dark:text-blue-400">{msg.sender}</span>
+                                                                    <span className="text-xs text-muted-foreground">{msg.time}</span>
+                                                                </div>
+                                                                <div className="flex items-center gap-2 mb-2">
+                                                                    <Badge variant="outline" className="text-[10px] bg-blue-100 text-blue-700 border-blue-200 h-5 px-1.5">Action</Badge>
+                                                                </div>
+                                                                <p>{msg.content}</p>
+                                                                <div className="mt-3 flex items-center gap-2 bg-background/50 p-2 rounded-lg border border-blue-100 dark:border-blue-800/50">
+                                                                    <Loader2 className="h-4 w-4 text-blue-500 animate-spin" />
+                                                                    <span className="text-xs font-medium text-blue-600 dark:text-blue-400">Processing request...</span>
+                                                                </div>
+                                                            </div>
+                                                        ) : msg.type === 'action_success' ? (
+                                                            <DiscrepancyActionCard msg={msg} />
                                                         ) : (
                                                             <>
                                                                 <div className={`flex items-center gap-2 ${msg.type === 'user' ? 'justify-end' : ''}`}>
@@ -1155,8 +1496,8 @@ export default function Detail({ onBack }: { onBack: () => void }) {
                                     </div>
                                 </ScrollArea>
                             </div>
-                        </div>
-                    </TabsContent>
+                        </div >
+                    </TabsContent >
                 </Tabs >
             </div >
         </div >
