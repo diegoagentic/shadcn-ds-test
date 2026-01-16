@@ -210,9 +210,15 @@ const PendingOrders = () => {
     )
 }
 
-// @ts-ignore
-export default function Workspace({ onBack }) {
-    // --- State ---
+interface WorkspaceProps {
+    onBack: () => void;
+    onLogout: () => void;
+    onNavigateToWorkspace: () => void;
+}
+
+export default function Workspace({ onBack, onLogout, onNavigateToWorkspace }: WorkspaceProps) {
+    const [activeTab, setActiveTab] = useState('board')
+    const [searchQuery, setSearchQuery] = useState('')
     const [messages, setMessages] = useState([
         {
             id: '1',
@@ -498,7 +504,7 @@ export default function Workspace({ onBack }) {
                         <DialogDescription>
                             Real-time internal system events and background processes.
                         </DialogDescription>
-                    </DialogHeader>
+                    </DialogHeader >
                     <ScrollArea className="h-[300px] w-full rounded-md border p-4 bg-muted/50">
                         <div className="space-y-3">
                             {systemLogs.map((log) => (
@@ -519,9 +525,9 @@ export default function Workspace({ onBack }) {
                     <DialogFooter>
                         <Button variant="secondary" onClick={() => setIsLogsOpen(false)}>Close</Button>
                     </DialogFooter>
-                </DialogContent>
-            </Dialog>
-            <Navbar onLogout={() => { }} onNavigateToWorkspace={() => { }} activeTab="Overview" />
+                </DialogContent >
+            </Dialog >
+            <Navbar onLogout={onLogout} activeTab="Overview" onNavigateToWorkspace={onNavigateToWorkspace} />
 
             {/* Main Content Container - shifted down for navbar */}
             <div className="flex-1 flex flex-col pt-[72px] h-full">
@@ -710,6 +716,6 @@ export default function Workspace({ onBack }) {
                     </div>
                 </div>
             </div>
-        </div>
+        </div >
     )
 }
